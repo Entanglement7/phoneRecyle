@@ -1,0 +1,7 @@
+node_modules/
+unpackage/
+*.log
+phone_recycle.db
+backend/__pycache__/
+*.pyc
+.DS_Store

@@ -1,0 +1,170 @@
+<template>
+  <view class="container">
+    <view class="header">
+      <view class="header-inner">
+        <text class="header-icon">📱</text>
+        <text class="title">华为智能估值系统</text>
+        <text class="subtitle">二手机回收评估平台</text>
+      </view>
+    </view>
+    <view class="section-label">快捷功能</view>
+    <view class="nav-grid">
+      <view class="nav-item nav-blue" @click="navigateTo('/pages/phoneRecyle/inputParams/inputParams')">
+        <view class="nav-icon-wrap nav-icon-wrap-blue">
+          <text class="nav-icon">📱</text>
+        </view>
+        <text class="nav-text">基础参数录入</text>
+      </view>
+      <view class="nav-item nav-purple" @click="navigateTo('/pages/phoneRecyle/appearanceDetect/appearanceDetect')">
+        <view class="nav-icon-wrap nav-icon-wrap-purple">
+          <text class="nav-icon">📸</text>
+        </view>
+        <text class="nav-text">外观检测</text>
+      </view>
+      <view class="nav-item nav-green" @click="navigateTo('/pages/phoneRecyle/functionTest/functionTest')">
+        <view class="nav-icon-wrap nav-icon-wrap-green">
+          <text class="nav-icon">🔧</text>
+        </view>
+        <text class="nav-text">功能检测</text>
+      </view>
+      <view class="nav-item nav-orange" @click="navigateTo('/pages/phoneRecyle/valuationResult/valuationResult')">
+        <view class="nav-icon-wrap nav-icon-wrap-orange">
+          <text class="nav-icon">💰</text>
+        </view>
+        <text class="nav-text">估值结果</text>
+      </view>
+    </view>
+    <view class="section-label">管理功能</view>
+    <view class="nav-grid">
+      <view class="nav-item nav-teal" @click="navigateTo('/pages/phoneRecyle/valuationManage/valuationManage')">
+        <view class="nav-icon-wrap nav-icon-wrap-teal">
+          <text class="nav-icon">📋</text>
+        </view>
+        <text class="nav-text">估值记录</text>
+      </view>
+      <view class="nav-item nav-indigo" @click="navigateTo('/pages/phoneRecyle/modelManage/modelManage')">
+        <view class="nav-icon-wrap nav-icon-wrap-indigo">
+          <text class="nav-icon">🗂️</text>
+        </view>
+        <text class="nav-text">机型管理</text>
+      </view>
+      <view class="nav-item nav-slate" @click="navigateTo('/pages/phoneRecyle/paramConfig/paramConfig')">
+        <view class="nav-icon-wrap nav-icon-wrap-slate">
+          <text class="nav-icon">⚙️</text>
+        </view>
+        <text class="nav-text">参数配置</text>
+      </view>
+      <view class="nav-item nav-red" @click="logout">
+        <view class="nav-icon-wrap nav-icon-wrap-red">
+          <text class="nav-icon">🚪</text>
+        </view>
+        <text class="nav-text">退出登录</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup>
+const navigateTo = (url) => {
+  uni.navigateTo({ url });
+};
+
+const logout = () => {
+  uni.removeStorageSync('userInfo');
+  uni.redirectTo({ url: '/pages/phoneRecyle/login/login' });
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 0;
+  background-color: #f0f4f8;
+  min-height: 100vh;
+}
+
+.header {
+  background-color: #1a56db;
+  padding: 60rpx 40rpx 70rpx;
+  position: relative;
+}
+
+.header-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-icon {
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 2rpx;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.75);
+  margin-top: 10rpx;
+}
+
+.section-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #64748b;
+  padding: 30rpx 30rpx 16rpx;
+  letter-spacing: 2rpx;
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  padding: 0 24rpx 10rpx;
+}
+
+.nav-item {
+  background-color: #fff;
+  padding: 36rpx 20rpx;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+}
+
+.nav-icon-wrap {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+}
+
+.nav-icon-wrap-blue   { background: #eff6ff; }
+.nav-icon-wrap-purple { background: #f5f3ff; }
+.nav-icon-wrap-green  { background: #f0fdf4; }
+.nav-icon-wrap-orange { background: #fff7ed; }
+.nav-icon-wrap-teal   { background: #f0fdfa; }
+.nav-icon-wrap-indigo { background: #eef2ff; }
+.nav-icon-wrap-slate  { background: #f8fafc; }
+.nav-icon-wrap-red    { background: #fff1f2; }
+
+.nav-icon {
+  font-size: 48rpx;
+}
+
+.nav-text {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #334155;
+  text-align: center;
+}
+</style>

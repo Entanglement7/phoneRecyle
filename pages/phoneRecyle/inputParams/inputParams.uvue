@@ -1,0 +1,391 @@
+<template>
+  <view class="container">
+    <view class="page-header">
+      <text class="page-title">手机基础参数录入</text>
+      <text class="page-desc">请填写手机的基本配置信息</text>
+    </view>
+
+    <view class="form">
+      <!-- 华为机型 -->
+      <view class="form-item">
+        <text class="label">华为机型</text>
+        <view class="select-box" @click="openDropdown('model')">
+          <text class="select-value">{{ selectedModel || '请选择机型' }}</text>
+          <text class="select-arrow">⌄</text>
+        </view>
+      </view>
+      <view class="divider" />
+
+      <!-- 内存 -->
+      <view class="form-item">
+        <text class="label">内存</text>
+        <view class="select-box" @click="openDropdown('ram')">
+          <text class="select-value">{{ selectedRam || '请选择内存' }}</text>
+          <text class="select-arrow">⌄</text>
+        </view>
+      </view>
+      <view class="divider" />
+
+      <!-- 存储 -->
+      <view class="form-item">
+        <text class="label">存储</text>
+        <view class="select-box" @click="openDropdown('storage')">
+          <text class="select-value">{{ selectedStorage || '请选择存储' }}</text>
+          <text class="select-arrow">⌄</text>
+        </view>
+      </view>
+      <view class="divider" />
+
+      <!-- 购买渠道 -->
+      <view class="form-item">
+        <text class="label">购买渠道</text>
+        <view class="select-box" @click="openDropdown('channel')">
+          <text class="select-value">{{ selectedChannel || '请选择渠道' }}</text>
+          <text class="select-arrow">⌄</text>
+        </view>
+      </view>
+      <view class="divider" />
+
+      <!-- 使用时长 -->
+      <view class="form-item">
+        <text class="label">使用时长（月）</text>
+        <input type="number" v-model="usageMonths" placeholder="请输入使用时长" class="input" />
+      </view>
+
+      <button type="primary" class="submit-btn" @click="submitParams">下一步：外观检测</button>
+    </view>
+
+    <!-- 下拉选择器弹窗 -->
+    <view v-if="dropdownVisible" class="dropdown-mask" @click="closeDropdown">
+      <view class="dropdown-panel" @click.stop="">
+        <view class="dropdown-header">
+          <text class="dropdown-title">{{ dropdownTitle }}</text>
+          <text class="dropdown-close" @click="closeDropdown">✕</text>
+        </view>
+        <view class="search-wrap">
+          <text class="search-icon">🔍</text>
+          <input
+            class="search-input"
+            v-model="searchKeyword"
+            :placeholder="'搜索' + dropdownTitle"
+            focus
+          />
+          <text v-if="searchKeyword" class="search-clear" @click="searchKeyword = ''">✕</text>
+        </view>
+        <scroll-view scroll-y class="option-list">
+          <view
+            v-for="(item, index) in filteredOptions"
+            :key="index"
+            class="option-item"
+            :class="{ 'option-active': item === currentValue }"
+            @click="selectOption(item)"
+          >
+            <text class="option-text">{{ item }}</text>
+            <text v-if="item === currentValue" class="option-check">✓</text>
+          </view>
+          <view v-if="filteredOptions.length === 0" class="option-empty">
+            <text class="option-empty-text">无匹配结果</text>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+
+const models = ['华为 Mate 60 Pro', '华为 Mate 60', '华为 P60 Pro', '华为 P60', '华为 Mate 50 Pro', '华为 Mate 50', '华为 P50 Pro', '华为 P50', '华为 nova 11 Pro', '华为 nova 11'];
+const ramOptions = ['4GB', '6GB', '8GB', '12GB', '16GB'];
+const storageOptions = ['64GB', '128GB', '256GB', '512GB', '1TB'];
+const channelOptions = ['官方渠道', '授权店', '二手市场', '其他'];
+
+const selectedModel = ref('华为 Mate 60 Pro');
+const selectedRam = ref('8GB');
+const selectedStorage = ref('256GB');
+const selectedChannel = ref('官方渠道');
+const usageMonths = ref('');
+
+// 下拉状态
+const dropdownVisible = ref(false);
+const dropdownType = ref('');
+const dropdownTitle = ref('');
+const searchKeyword = ref('');
+const currentOptions = ref([]);
+const currentValue = ref('');
+
+const filteredOptions = computed(() => {
+  if (!searchKeyword.value) return currentOptions.value;
+  const kw = searchKeyword.value.toLowerCase();
+  return currentOptions.value.filter(item => item.toLowerCase().includes(kw));
+});
+
+const openDropdown = (type) => {
+  dropdownType.value = type;
+  searchKeyword.value = '';
+  if (type === 'model') {
+    dropdownTitle.value = '华为机型';
+    currentOptions.value = models;
+    currentValue.value = selectedModel.value;
+  } else if (type === 'ram') {
+    dropdownTitle.value = '内存';
+    currentOptions.value = ramOptions;
+    currentValue.value = selectedRam.value;
+  } else if (type === 'storage') {
+    dropdownTitle.value = '存储';
+    currentOptions.value = storageOptions;
+    currentValue.value = selectedStorage.value;
+  } else if (type === 'channel') {
+    dropdownTitle.value = '购买渠道';
+    currentOptions.value = channelOptions;
+    currentValue.value = selectedChannel.value;
+  }
+  dropdownVisible.value = true;
+};
+
+const selectOption = (item) => {
+  if (dropdownType.value === 'model') selectedModel.value = item;
+  else if (dropdownType.value === 'ram') selectedRam.value = item;
+  else if (dropdownType.value === 'storage') selectedStorage.value = item;
+  else if (dropdownType.value === 'channel') selectedChannel.value = item;
+  closeDropdown();
+};
+
+const closeDropdown = () => {
+  dropdownVisible.value = false;
+  searchKeyword.value = '';
+};
+
+const submitParams = () => {
+  if (!usageMonths.value) {
+    uni.showToast({ title: '请输入使用时长', icon: 'none' });
+    return;
+  }
+  const params = {
+    model: selectedModel.value,
+    ram: selectedRam.value,
+    storage: selectedStorage.value,
+    channel: selectedChannel.value,
+    usageMonths: usageMonths.value
+  };
+  uni.setStorageSync('phoneParams', params);
+  uni.showToast({ title: '参数提交成功', icon: 'success' });
+  setTimeout(() => {
+    uni.navigateTo({ url: '/pages/phoneRecyle/appearanceDetect/appearanceDetect' });
+  }, 1000);
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 0;
+  background-color: #f0f4f8;
+  min-height: 100vh;
+}
+
+.page-header {
+  background-color: #1a56db;
+  padding: 50rpx 40rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.page-desc {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.75);
+  margin-top: 10rpx;
+}
+
+.form {
+  background-color: #fff;
+  margin: 24rpx;
+  padding: 0 28rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+}
+
+.form-item {
+  padding: 28rpx 0 20rpx;
+}
+
+.divider {
+  height: 1rpx;
+  background-color: #f1f5f9;
+}
+
+.label {
+  display: block;
+  margin-bottom: 16rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #475569;
+}
+
+.select-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22rpx 24rpx;
+  background-color: #f8fafc;
+  border-radius: 14rpx;
+  border: 1rpx solid #e2e8f0;
+}
+
+.select-value {
+  font-size: 28rpx;
+  color: #1e293b;
+}
+
+.select-arrow {
+  font-size: 32rpx;
+  color: #94a3b8;
+}
+
+.input {
+  width: 100%;
+  padding: 22rpx 24rpx;
+  border: 1rpx solid #e2e8f0;
+  border-radius: 14rpx;
+  font-size: 28rpx;
+  color: #1e293b;
+  background-color: #f8fafc;
+  box-sizing: border-box;
+}
+
+.submit-btn {
+  width: 100%;
+  margin: 30rpx 0 36rpx;
+  padding: 28rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  border-radius: 16rpx;
+  background-color: #1a56db;
+  border: none;
+}
+
+/* 下拉弹窗 */
+.dropdown-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index: 999;
+}
+
+.dropdown-panel {
+  background-color: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 36rpx 20rpx;
+  border-bottom: 1rpx solid #f1f5f9;
+}
+
+.dropdown-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1e293b;
+}
+
+.dropdown-close {
+  font-size: 28rpx;
+  color: #94a3b8;
+  padding: 10rpx;
+}
+
+.search-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 20rpx 28rpx;
+  padding: 16rpx 24rpx;
+  background-color: #f1f5f9;
+  border-radius: 12rpx;
+}
+
+.search-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1e293b;
+  background-color: transparent;
+}
+
+.search-clear {
+  font-size: 24rpx;
+  color: #94a3b8;
+  padding: 0 4rpx;
+}
+
+.option-list {
+  flex: 1;
+  max-height: 50vh;
+  padding: 0 16rpx 20rpx;
+}
+
+.option-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 20rpx;
+  border-radius: 12rpx;
+  margin-bottom: 4rpx;
+}
+
+.option-item.option-active {
+  background-color: #eff6ff;
+}
+
+.option-text {
+  font-size: 30rpx;
+  color: #1e293b;
+}
+
+.option-item.option-active .option-text {
+  color: #1a56db;
+  font-weight: 600;
+}
+
+.option-check {
+  font-size: 28rpx;
+  color: #1a56db;
+  font-weight: bold;
+}
+
+.option-empty {
+  padding: 60rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.option-empty-text {
+  font-size: 28rpx;
+  color: #94a3b8;
+}
+</style>

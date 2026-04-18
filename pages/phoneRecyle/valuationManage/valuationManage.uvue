@@ -1,0 +1,273 @@
+<template>
+  <view class="container">
+    <view class="header">
+      <text class="title">估值记录管理</text>
+    </view>
+    <view class="search-section">
+      <input type="text" v-model="searchKeyword" placeholder="搜索机型" class="search-input" />
+      <button type="default" class="search-btn" @click="search">搜索</button>
+    </view>
+    <view class="filter-section">
+      <picker @change="bindDateChange" :value="dateIndex" :range="dateOptions">
+        <view class="filter-item">
+          {{ dateOptions[dateIndex] }}
+        </view>
+      </picker>
+    </view>
+    <view class="list-section">
+      <view class="list-item" v-for="(item, index) in filteredList" :key="index">
+        <view class="item-header">
+          <text class="item-model">{{ item.phoneParams.model }}</text>
+          <text class="item-time">{{ formatTime(item.valuationTime) }}</text>
+        </view>
+        <view class="item-body">
+          <view class="item-detail">
+            <text class="detail-label">内存：</text>
+            <text class="detail-value">{{ item.phoneParams.ram }}</text>
+          </view>
+          <view class="item-detail">
+            <text class="detail-label">存储：</text>
+            <text class="detail-value">{{ item.phoneParams.storage }}</text>
+          </view>
+          <view class="item-detail">
+            <text class="detail-label">外观评分：</text>
+            <text class="detail-value">{{ item.appearanceScore }}/100</text>
+          </view>
+        </view>
+        <view class="item-footer">
+          <text class="price-label">回收估值：</text>
+          <text class="price-value">¥{{ item.recyclePrice }}</text>
+          <text class="price-label">销售估值：</text>
+          <text class="price-value">¥{{ item.salePrice }}</text>
+          <button type="default" class="delete-btn" @click="deleteRecord(index)">删除</button>
+        </view>
+      </view>
+      <view class="empty" v-if="filteredList.length === 0">
+        <text>暂无估值记录</text>
+      </view>
+    </view>
+    <view class="action-buttons">
+      <button type="primary" class="action-btn" @click="exportRecords">导出记录</button>
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+
+const searchKeyword = ref('');
+const dateIndex = ref(0);
+const dateOptions = ['全部时间', '最近7天', '最近30天', '最近90天'];
+const history = ref([]);
+
+onMounted(() => {
+  // 从本地存储获取历史记录
+  history.value = uni.getStorageSync('valuationHistory') || [];
+});
+
+const filteredList = computed(() => {
+  let result = [...history.value];
+  
+  // 按关键词搜索
+  if (searchKeyword.value) {
+    result = result.filter(item => 
+      item.phoneParams.model.includes(searchKeyword.value)
+    );
+  }
+  
+  // 按时间筛选
+  if (dateIndex.value > 0) {
+    const days = [7, 30, 90][dateIndex.value - 1];
+    const cutoffTime = new Date();
+    cutoffTime.setDate(cutoffTime.getDate() - days);
+    result = result.filter(item => 
+      new Date(item.valuationTime) >= cutoffTime
+    );
+  }
+  
+  // 按时间倒序排序
+  result.sort((a, b) => 
+    new Date(b.valuationTime) - new Date(a.valuationTime)
+  );
+  
+  return result;
+});
+
+const search = () => {
+  // 搜索逻辑已在computed中处理
+};
+
+const bindDateChange = (e) => {
+  dateIndex.value = e.detail.value;
+};
+
+const formatTime = (timeStr) => {
+  const date = new Date(timeStr);
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+};
+
+const deleteRecord = (index) => {
+  uni.showModal({
+    title: '确认删除',
+    content: '确定要删除这条估值记录吗？',
+    success: (res) => {
+      if (res.confirm) {
+        const recordIndex = history.value.findIndex((_, i) => i === index);
+        history.value.splice(recordIndex, 1);
+        uni.setStorageSync('valuationHistory', history.value);
+        uni.showToast({ title: '删除成功', icon: 'success' });
+      }
+    }
+  });
+};
+
+const exportRecords = () => {
+  // 模拟导出功能
+  uni.showToast({ title: '导出功能开发中', icon: 'none' });
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.search-section {
+  display: flex;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.search-input {
+  flex: 1;
+  padding: 20rpx;
+  border: 1rpx solid #d9d9d9;
+  border-radius: 5rpx;
+  font-size: 28rpx;
+}
+
+.search-btn {
+  padding: 0 30rpx;
+}
+
+.filter-section {
+  background-color: #fff;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  margin-bottom: 20rpx;
+}
+
+.filter-item {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.list-section {
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  margin-bottom: 30rpx;
+}
+
+.list-item {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.item-model {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.item-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.item-body {
+  display: flex;
+  gap: 30rpx;
+  margin-bottom: 15rpx;
+}
+
+.item-detail {
+  display: flex;
+  font-size: 26rpx;
+}
+
+.detail-label {
+  color: #666;
+}
+
+.detail-value {
+  color: #333;
+  margin-left: 5rpx;
+}
+
+.item-footer {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  flex-wrap: wrap;
+}
+
+.price-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.price-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ff4d4f;
+}
+
+.delete-btn {
+  margin-left: auto;
+  padding: 0 20rpx;
+  font-size: 24rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.action-buttons {
+  display: flex;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 20rpx;
+  font-size: 30rpx;
+}
+</style>

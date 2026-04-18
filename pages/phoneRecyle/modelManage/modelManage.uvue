@@ -1,0 +1,329 @@
+<template>
+  <view class="container">
+    <view class="header">
+      <text class="title">华为机型信息管理</text>
+    </view>
+    <button type="primary" class="add-btn" @click="showAddModel">添加机型</button>
+    <view class="list-section">
+      <view class="list-item" v-for="(model, index) in models" :key="index">
+        <view class="item-header">
+          <text class="item-name">{{ model.name }}</text>
+          <view class="item-actions">
+            <button type="default" class="action-btn" @click="editModel(index)">编辑</button>
+            <button type="default" class="action-btn delete" @click="deleteModel(index)">删除</button>
+          </view>
+        </view>
+        <view class="item-body">
+          <view class="item-detail">
+            <text class="detail-label">型号：</text>
+            <text class="detail-value">{{ model.model }}</text>
+          </view>
+          <view class="item-detail">
+            <text class="detail-label">上市价格：</text>
+            <text class="detail-value">¥{{ model.price }}</text>
+          </view>
+          <view class="item-detail">
+            <text class="detail-label">基础配置：</text>
+            <text class="detail-value">{{ model.config }}</text>
+          </view>
+        </view>
+      </view>
+      <view class="empty" v-if="models.length === 0">
+        <text>暂无机型信息</text>
+      </view>
+    </view>
+    <!-- 添加/编辑机型弹窗 -->
+    <view class="modal" v-if="showModal">
+      <view class="modal-content">
+        <view class="modal-header">
+          <text class="modal-title">{{ isEditing ? '编辑机型' : '添加机型' }}</text>
+          <text class="modal-close" @click="showModal = false">×</text>
+        </view>
+        <form class="modal-form">
+          <view class="form-item">
+            <text class="label">机型名称</text>
+            <input type="text" v-model="formData.name" placeholder="请输入机型名称" class="input" />
+          </view>
+          <view class="form-item">
+            <text class="label">型号</text>
+            <input type="text" v-model="formData.model" placeholder="请输入型号" class="input" />
+          </view>
+          <view class="form-item">
+            <text class="label">上市价格</text>
+            <input type="number" v-model="formData.price" placeholder="请输入上市价格" class="input" />
+          </view>
+          <view class="form-item">
+            <text class="label">基础配置</text>
+            <input type="text" v-model="formData.config" placeholder="请输入基础配置" class="input" />
+          </view>
+          <view class="modal-actions">
+            <button type="default" class="modal-btn" @click="showModal = false">取消</button>
+            <button type="primary" class="modal-btn" @click="saveModel">保存</button>
+          </view>
+        </form>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+
+const models = ref([]);
+const showModal = ref(false);
+const isEditing = ref(false);
+const editingIndex = ref(-1);
+const formData = ref({
+  name: '',
+  model: '',
+  price: '',
+  config: ''
+});
+
+onMounted(() => {
+  // 从本地存储获取机型数据
+  const savedModels = uni.getStorageSync('phoneModels');
+  if (savedModels) {
+    models.value = savedModels;
+  } else {
+    // 初始化默认数据
+    models.value = [
+      {
+        name: '华为 Mate 60 Pro',
+        model: 'Mate 60 Pro',
+        price: '6999',
+        config: '8GB+256GB, 麒麟9000S, 6.8英寸'
+      },
+      {
+        name: '华为 P60 Pro',
+        model: 'P60 Pro',
+        price: '6988',
+        config: '8GB+256GB, 骁龙8+ Gen 1, 6.67英寸'
+      }
+    ];
+    uni.setStorageSync('phoneModels', models.value);
+  }
+});
+
+const showAddModel = () => {
+  isEditing.value = false;
+  editingIndex.value = -1;
+  formData.value = {
+    name: '',
+    model: '',
+    price: '',
+    config: ''
+  };
+  showModal.value = true;
+};
+
+const editModel = (index) => {
+  isEditing.value = true;
+  editingIndex.value = index;
+  formData.value = { ...models.value[index] };
+  showModal.value = true;
+};
+
+const deleteModel = (index) => {
+  uni.showModal({
+    title: '确认删除',
+    content: '确定要删除这个机型吗？',
+    success: (res) => {
+      if (res.confirm) {
+        models.value.splice(index, 1);
+        uni.setStorageSync('phoneModels', models.value);
+        uni.showToast({ title: '删除成功', icon: 'success' });
+      }
+    }
+  });
+};
+
+const saveModel = () => {
+  if (!formData.value.name || !formData.value.model || !formData.value.price || !formData.value.config) {
+    uni.showToast({ title: '请填写完整信息', icon: 'none' });
+    return;
+  }
+  
+  if (isEditing.value) {
+    models.value[editingIndex.value] = { ...formData.value };
+  } else {
+    models.value.push({ ...formData.value });
+  }
+  
+  uni.setStorageSync('phoneModels', models.value);
+  showModal.value = false;
+  uni.showToast({ title: '保存成功', icon: 'success' });
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.add-btn {
+  width: 100%;
+  margin-bottom: 20rpx;
+  padding: 20rpx;
+  font-size: 30rpx;
+}
+
+.list-section {
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.list-item {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.item-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.item-actions {
+  display: flex;
+  gap: 10rpx;
+}
+
+.action-btn {
+  padding: 0 20rpx;
+  font-size: 24rpx;
+}
+
+.action-btn.delete {
+  color: #ff4d4f;
+}
+
+.item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.item-detail {
+  display: flex;
+  font-size: 26rpx;
+}
+
+.detail-label {
+  color: #666;
+  width: 120rpx;
+}
+
+.detail-value {
+  color: #333;
+  flex: 1;
+}
+
+.empty {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 10rpx;
+  width: 80%;
+  max-width: 500rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 40rpx;
+  color: #999;
+  cursor: pointer;
+}
+
+.modal-form {
+  padding: 20rpx;
+}
+
+.form-item {
+  margin-bottom: 20rpx;
+}
+
+.label {
+  display: block;
+  margin-bottom: 10rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.input {
+  width: 100%;
+  padding: 20rpx;
+  border: 1rpx solid #d9d9d9;
+  border-radius: 5rpx;
+  font-size: 28rpx;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 30rpx;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 20rpx;
+  font-size: 30rpx;
+}
+</style>

@@ -1,0 +1,300 @@
+<template>
+  <view class="container">
+    <view class="page-header">
+      <text class="page-title">手机外观检测</text>
+      <text class="page-desc">上传手机图片，AI 自动评估外观状态</text>
+    </view>
+    <view class="card upload-section">
+      <text class="section-title">上传手机外观图片</text>
+      <text class="section-hint">最多上传 4 张，建议拍摄正面、背面、边框</text>
+      <view class="upload-grid">
+        <view class="upload-item" v-for="(item, index) in imageList" :key="index">
+          <image :src="item" class="uploaded-image" mode="aspectFill" />
+          <view class="delete-btn" @click="deleteImage(index)">×</view>
+        </view>
+        <view class="upload-item upload-btn" @click="chooseImage" v-if="imageList.length < 4">
+          <text class="upload-icon">+</text>
+          <text class="upload-text">添加图片</text>
+        </view>
+      </view>
+    </view>
+    <button type="primary" class="detect-btn" @click="detectAppearance" :disabled="imageList.length === 0">
+      开始 AI 检测
+    </button>
+    <view class="card result-section" v-if="appearanceScore > 0">
+      <text class="section-title">检测结果</text>
+      <view class="score-card">
+        <view class="score-info">
+          <text class="score-label">外观综合评分</text>
+          <view class="score-row">
+            <text class="score-value">{{ appearanceScore }}</text>
+            <text class="score-unit">/ 100</text>
+          </view>
+        </view>
+        <view class="score-bar-wrap">
+          <view class="score-bar" :style="{ width: appearanceScore + '%' }" />
+        </view>
+      </view>
+      <view class="detail-list">
+        <view class="detail-row">
+          <text class="detail-label">屏幕状态</text>
+          <text class="detail-value good">{{ screenCondition }}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">机身状态</text>
+          <text class="detail-value warn">{{ bodyCondition }}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">边框状态</text>
+          <text class="detail-value good">{{ borderCondition }}</text>
+        </view>
+      </view>
+      <button type="primary" class="next-btn" @click="nextStep">下一步：功能检测</button>
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const imageList = ref([]);
+const appearanceScore = ref(0);
+const screenCondition = ref('');
+const bodyCondition = ref('');
+const borderCondition = ref('');
+
+const chooseImage = () => {
+  uni.chooseImage({
+    count: 4 - imageList.value.length,
+    sizeType: ['compressed'],
+    success: (res) => {
+      imageList.value = [...imageList.value, ...res.tempFilePaths];
+    }
+  });
+};
+
+const deleteImage = (index) => {
+  imageList.value.splice(index, 1);
+};
+
+const detectAppearance = () => {
+  uni.showLoading({ title: '检测中...' });
+  setTimeout(() => {
+    uni.hideLoading();
+    appearanceScore.value = Math.floor(Math.random() * 20) + 80;
+    screenCondition.value = '良好';
+    bodyCondition.value = '轻微划痕';
+    borderCondition.value = '正常';
+    uni.setStorageSync('appearanceScore', appearanceScore.value);
+    uni.showToast({ title: '检测完成', icon: 'success' });
+  }, 2000);
+};
+
+const nextStep = () => {
+  uni.navigateTo({ url: '/pages/phoneRecyle/functionTest/functionTest' });
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 0;
+  background-color: #f0f4f8;
+  min-height: 100vh;
+}
+
+.page-header {
+  background-color: #1a56db;
+  padding: 50rpx 40rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.page-desc {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.75);
+  margin-top: 10rpx;
+}
+
+.card {
+  background-color: #fff;
+  margin: 24rpx;
+  padding: 32rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.section-hint {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-bottom: 28rpx;
+  display: block;
+}
+
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.upload-item {
+  width: 100%;
+  height: 220rpx;
+  border: 2rpx dashed #cbd5e1;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 14rpx;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  width: 44rpx;
+  height: 44rpx;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.upload-btn {
+  background-color: #f8fafc;
+}
+
+.upload-icon {
+  font-size: 64rpx;
+  color: #a855f7;
+  margin-bottom: 8rpx;
+}
+
+.upload-text {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.detect-btn {
+  width: calc(100% - 48rpx);
+  margin: 0 24rpx 24rpx;
+  padding: 28rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  border-radius: 16rpx;
+  background-color: #1a56db;
+  border: none;
+}
+
+.score-card {
+  background-color: #eff6ff;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  margin-bottom: 28rpx;
+}
+
+.score-info {
+  margin-bottom: 16rpx;
+}
+
+.score-label {
+  font-size: 26rpx;
+  color: #6d28d9;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.score-row {
+  display: flex;
+  align-items: baseline;
+}
+
+.score-value {
+  font-size: 60rpx;
+  font-weight: bold;
+  color: #7c3aed;
+}
+
+.score-unit {
+  font-size: 26rpx;
+  color: #a78bfa;
+  margin-left: 6rpx;
+}
+
+.score-bar-wrap {
+  height: 12rpx;
+  background-color: #ddd6fe;
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.score-bar {
+  height: 100%;
+  background-color: #1a56db;
+  border-radius: 6rpx;
+}
+
+.detail-list {
+  margin-bottom: 24rpx;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f1f5f9;
+  font-size: 28rpx;
+}
+
+.detail-label {
+  color: #64748b;
+}
+
+.detail-value {
+  font-weight: 600;
+}
+
+.detail-value.good {
+  color: #16a34a;
+}
+
+.detail-value.warn {
+  color: #d97706;
+}
+
+.next-btn {
+  width: 100%;
+  padding: 28rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  border-radius: 16rpx;
+  background-color: #1a56db;
+  border: none;
+}
+</style>

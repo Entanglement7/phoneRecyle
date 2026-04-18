@@ -1,0 +1,285 @@
+<template>
+  <scroll-view scroll-y class="container">
+    <view class="banner">
+      <text class="banner-title">华为智能二手机估值</text>
+      <text class="banner-subtitle">专业评估，价格透明</text>
+    </view>
+
+    <view class="entry-section">
+      <button class="entry-btn" @click="startValuation">
+        <text class="entry-btn-text">立即开始估值</text>
+      </button>
+    </view>
+
+    <view class="card">
+      <text class="card-title">估值流程</text>
+      <view class="steps">
+        <view class="step">
+          <view class="step-num"><text class="step-num-text">1</text></view>
+          <text class="step-text">录入参数</text>
+        </view>
+        <text class="step-arrow">→</text>
+        <view class="step">
+          <view class="step-num"><text class="step-num-text">2</text></view>
+          <text class="step-text">外观检测</text>
+        </view>
+        <text class="step-arrow">→</text>
+        <view class="step">
+          <view class="step-num"><text class="step-num-text">3</text></view>
+          <text class="step-text">功能检测</text>
+        </view>
+        <text class="step-arrow">→</text>
+        <view class="step">
+          <view class="step-num"><text class="step-num-text">4</text></view>
+          <text class="step-text">获取估值</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="card-title">服务亮点</text>
+      <view class="service-grid">
+        <view class="service-item">
+          <text class="service-icon">🛡️</text>
+          <text class="service-name">专业评估</text>
+        </view>
+        <view class="service-item">
+          <text class="service-icon">💰</text>
+          <text class="service-name">价格透明</text>
+        </view>
+        <view class="service-item">
+          <text class="service-icon">⚡</text>
+          <text class="service-name">快速估值</text>
+        </view>
+        <view class="service-item">
+          <text class="service-icon">🏪</text>
+          <text class="service-name">门店回收</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card" style="margin-bottom: 24rpx;">
+      <text class="card-title">门店信息</text>
+      <view class="store-row">
+        <view class="store-avatar"><text class="store-avatar-text">华</text></view>
+        <view class="store-info">
+          <text class="store-name">华为授权服务中心</text>
+          <text class="store-addr">北京市朝阳区建国路88号</text>
+          <text class="store-time">营业时间：9:00-18:00</text>
+        </view>
+      </view>
+      <button class="store-btn" @click="viewStore">查看详情</button>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup>
+const startValuation = () => {
+  uni.navigateTo({ url: '/pages/phoneRecyle/inputParams/inputParams' });
+};
+const viewStore = () => {
+  uni.showToast({ title: '门店详情页面开发中', icon: 'none' });
+};
+</script>
+
+<style scoped>
+.container {
+  background-color: #f5f6fa;
+  min-height: 100vh;
+}
+
+.banner {
+  background-color: #1a56db;
+  padding: 50rpx 40rpx 50rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.banner-title {
+  font-size: 42rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.banner-subtitle {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.8);
+  margin-top: 12rpx;
+}
+
+.entry-section {
+  padding: 24rpx 24rpx 0;
+}
+
+.entry-btn {
+  width: 100%;
+  background-color: #1a56db;
+  border: none;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.entry-btn-icon {
+  font-size: 34rpx;
+  margin-right: 12rpx;
+}
+
+.entry-btn-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 2rpx;
+}
+
+.card {
+  background-color: #fff;
+  margin: 24rpx 24rpx 0;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 24rpx;
+  display: block;
+}
+
+.steps {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-num {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background-color: #1a56db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10rpx;
+}
+
+.step-num-text {
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: bold;
+}
+
+.step-text {
+  font-size: 20rpx;
+  color: #64748b;
+  text-align: center;
+}
+
+.step-arrow {
+  font-size: 22rpx;
+  color: #cbd5e1;
+  padding-bottom: 24rpx;
+}
+
+.service-grid {
+  display: flex;
+  flex-direction: row;
+}
+
+.service-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f8fafc;
+  padding: 20rpx 6rpx;
+  border-radius: 12rpx;
+  margin-right: 12rpx;
+}
+
+.service-item:last-child {
+  margin-right: 0;
+}
+
+.service-icon {
+  font-size: 40rpx;
+  margin-bottom: 10rpx;
+}
+
+.service-name {
+  font-size: 20rpx;
+  color: #475569;
+  text-align: center;
+}
+
+.store-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+}
+
+.store-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background-color: #1a56db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.store-avatar-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.store-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.store-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 8rpx;
+}
+
+.store-addr {
+  font-size: 24rpx;
+  color: #64748b;
+  margin-bottom: 6rpx;
+}
+
+.store-time {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+.store-btn {
+  width: 100%;
+  background-color: #f1f5f9;
+  border: 1rpx solid #e2e8f0;
+  border-radius: 12rpx;
+  padding: 18rpx;
+  font-size: 26rpx;
+  color: #475569;
+}
+</style>

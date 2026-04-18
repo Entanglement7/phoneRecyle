@@ -1,0 +1,152 @@
+<template>
+  <view class="container">
+    <view class="header">
+      <text class="title">估值参数配置</text>
+    </view>
+    <form class="form">
+      <view class="form-item">
+        <text class="label">外观磨损系数</text>
+        <input type="number" v-model="params.appearanceFactor" placeholder="请输入外观磨损系数" class="input" />
+        <text class="hint">范围：0.1-1.0，值越大表示外观对价格影响越小</text>
+      </view>
+      <view class="form-item">
+        <text class="label">使用年限折旧率</text>
+        <input type="number" v-model="params.yearlyDepreciation" placeholder="请输入年折旧率" class="input" />
+        <text class="hint">范围：0.01-0.1，值越大表示每年折旧越多</text>
+      </view>
+      <view class="form-item">
+        <text class="label">市场行情系数</text>
+        <input type="number" v-model="params.marketFactor" placeholder="请输入市场行情系数" class="input" />
+        <text class="hint">范围：0.5-1.5，值越大表示市场行情越好</text>
+      </view>
+      <view class="form-item">
+        <text class="label">电池健康度权重</text>
+        <input type="number" v-model="params.batteryWeight" placeholder="请输入电池健康度权重" class="input" />
+        <text class="hint">范围：0.1-0.5，值越大表示电池健康度对价格影响越大</text>
+      </view>
+      <view class="form-item">
+        <text class="label">功能正常权重</text>
+        <input type="number" v-model="params.functionWeight" placeholder="请输入功能正常权重" class="input" />
+        <text class="hint">范围：0.1-0.5，值越大表示功能状态对价格影响越大</text>
+      </view>
+      <button type="primary" class="save-btn" @click="saveParams">保存配置</button>
+    </form>
+  </view>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+
+const params = ref({
+  appearanceFactor: '0.8',
+  yearlyDepreciation: '0.05',
+  marketFactor: '1.0',
+  batteryWeight: '0.2',
+  functionWeight: '0.3'
+});
+
+onMounted(() => {
+  // 从本地存储获取参数配置
+  const savedParams = uni.getStorageSync('valuationParams');
+  if (savedParams) {
+    params.value = savedParams;
+  }
+});
+
+const saveParams = () => {
+  // 验证参数范围
+  const appearanceFactor = parseFloat(params.value.appearanceFactor);
+  const yearlyDepreciation = parseFloat(params.value.yearlyDepreciation);
+  const marketFactor = parseFloat(params.value.marketFactor);
+  const batteryWeight = parseFloat(params.value.batteryWeight);
+  const functionWeight = parseFloat(params.value.functionWeight);
+  
+  if (appearanceFactor < 0.1 || appearanceFactor > 1.0) {
+    uni.showToast({ title: '外观磨损系数应在0.1-1.0之间', icon: 'none' });
+    return;
+  }
+  
+  if (yearlyDepreciation < 0.01 || yearlyDepreciation > 0.1) {
+    uni.showToast({ title: '年折旧率应在0.01-0.1之间', icon: 'none' });
+    return;
+  }
+  
+  if (marketFactor < 0.5 || marketFactor > 1.5) {
+    uni.showToast({ title: '市场行情系数应在0.5-1.5之间', icon: 'none' });
+    return;
+  }
+  
+  if (batteryWeight < 0.1 || batteryWeight > 0.5) {
+    uni.showToast({ title: '电池健康度权重应在0.1-0.5之间', icon: 'none' });
+    return;
+  }
+  
+  if (functionWeight < 0.1 || functionWeight > 0.5) {
+    uni.showToast({ title: '功能正常权重应在0.1-0.5之间', icon: 'none' });
+    return;
+  }
+  
+  // 保存参数
+  uni.setStorageSync('valuationParams', params.value);
+  uni.showToast({ title: '配置保存成功', icon: 'success' });
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.form {
+  background-color: #fff;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.form-item {
+  margin-bottom: 20rpx;
+}
+
+.label {
+  display: block;
+  margin-bottom: 10rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.input {
+  width: 100%;
+  padding: 20rpx;
+  border: 1rpx solid #d9d9d9;
+  border-radius: 5rpx;
+  font-size: 28rpx;
+}
+
+.hint {
+  display: block;
+  margin-top: 5rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.save-btn {
+  width: 100%;
+  margin-top: 30rpx;
+  padding: 20rpx;
+  font-size: 30rpx;
+}
+</style>

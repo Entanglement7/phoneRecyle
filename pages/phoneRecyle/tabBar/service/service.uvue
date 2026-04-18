@@ -1,0 +1,362 @@
+<template>
+  <scroll-view scroll-y class="container">
+    <view class="page-header">
+      <text class="page-title">服务咨询</text>
+    </view>
+
+    <!-- 门店信息 -->
+    <view class="card">
+      <text class="card-title">门店信息</text>
+      <view class="store-row">
+        <view class="store-avatar"><text class="store-avatar-text">华</text></view>
+        <view class="store-meta">
+          <text class="store-name">华为授权服务中心</text>
+          <text class="store-addr">北京市朝阳区建国路88号</text>
+        </view>
+        <button class="nav-btn" @click="navigateToStore">导航</button>
+      </view>
+      <view class="info-row">
+        <text class="info-label">营业时间</text>
+        <text class="info-value">9:00 - 18:00</text>
+      </view>
+      <view class="divider" />
+      <view class="info-row">
+        <text class="info-label">联系电话</text>
+        <text class="info-value">400-830-8300</text>
+      </view>
+    </view>
+
+    <!-- 回收流程 -->
+    <view class="card">
+      <text class="card-title">回收流程</text>
+      <view class="timeline">
+        <view class="timeline-item">
+          <view class="tl-left">
+            <view class="tl-dot" />
+            <view class="tl-line" />
+          </view>
+          <view class="tl-content">
+            <text class="tl-title">在线估值</text>
+            <text class="tl-desc">通过系统进行智能估值</text>
+          </view>
+        </view>
+        <view class="timeline-item">
+          <view class="tl-left">
+            <view class="tl-dot" />
+            <view class="tl-line" />
+          </view>
+          <view class="tl-content">
+            <text class="tl-title">门店检测</text>
+            <text class="tl-desc">到店进行专业检测</text>
+          </view>
+        </view>
+        <view class="timeline-item">
+          <view class="tl-left">
+            <view class="tl-dot" />
+            <view class="tl-line" />
+          </view>
+          <view class="tl-content">
+            <text class="tl-title">确认价格</text>
+            <text class="tl-desc">确认最终回收价格</text>
+          </view>
+        </view>
+        <view class="timeline-item">
+          <view class="tl-left">
+            <view class="tl-dot tl-dot-last" />
+          </view>
+          <view class="tl-content">
+            <text class="tl-title">完成交易</text>
+            <text class="tl-desc">现场支付，完成回收</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 售后保障 -->
+    <view class="card">
+      <text class="card-title">售后保障</text>
+      <view class="guarantee-list">
+        <view class="guarantee-item">
+          <text class="guarantee-icon">🛡️</text>
+          <view class="guarantee-info">
+            <text class="guarantee-title">7天无理由退换</text>
+            <text class="guarantee-desc">符合条件可享受7天无理由退换</text>
+          </view>
+        </view>
+        <view class="divider" />
+        <view class="guarantee-item">
+          <text class="guarantee-icon">🔧</text>
+          <view class="guarantee-info">
+            <text class="guarantee-title">1年质保</text>
+            <text class="guarantee-desc">购买后享受1年质保服务</text>
+          </view>
+        </view>
+        <view class="divider" />
+        <view class="guarantee-item">
+          <text class="guarantee-icon">📞</text>
+          <view class="guarantee-info">
+            <text class="guarantee-title">专业客服</text>
+            <text class="guarantee-desc">7×24小时专业客服支持</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 联系我们 -->
+    <view class="card" style="margin-bottom: 24rpx;">
+      <text class="card-title">联系我们</text>
+      <view class="contact-item" @click="startConsult">
+        <text class="contact-icon">💬</text>
+        <text class="contact-text">在线客服</text>
+        <text class="contact-arrow">›</text>
+      </view>
+      <view class="divider" />
+      <view class="contact-item" @click="callService">
+        <text class="contact-icon">📞</text>
+        <text class="contact-text">电话咨询</text>
+        <text class="contact-arrow">›</text>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup>
+const navigateToStore = () => {
+  uni.showToast({ title: '导航功能开发中', icon: 'none' });
+};
+const startConsult = () => {
+  uni.showToast({ title: '在线客服功能开发中', icon: 'none' });
+};
+const callService = () => {
+  uni.makePhoneCall({ phoneNumber: '4008308300' });
+};
+</script>
+
+<style scoped>
+.container {
+  background-color: #f5f6fa;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.page-header {
+  background-color: #1a56db;
+  padding: 40rpx 30rpx 30rpx;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.card {
+  background-color: #fff;
+  margin: 20rpx 24rpx 0;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 24rpx;
+  display: block;
+}
+
+.store-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.store-avatar {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 50%;
+  background-color: #1a56db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 18rpx;
+  flex-shrink: 0;
+}
+
+.store-avatar-text {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.store-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.store-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 6rpx;
+}
+
+.store-addr {
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+.nav-btn {
+  background-color: #1a56db;
+  color: #fff;
+  border: none;
+  border-radius: 10rpx;
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #64748b;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.divider {
+  height: 1rpx;
+  background-color: #f1f5f9;
+}
+
+.timeline {
+  padding-left: 8rpx;
+}
+
+.timeline-item {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 0;
+}
+
+.tl-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 24rpx;
+  width: 24rpx;
+}
+
+.tl-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background-color: #1a56db;
+  flex-shrink: 0;
+  margin-top: 6rpx;
+}
+
+.tl-dot-last {
+  background-color: #16a34a;
+}
+
+.tl-line {
+  width: 2rpx;
+  flex: 1;
+  background-color: #e2e8f0;
+  margin: 6rpx 0;
+  min-height: 40rpx;
+}
+
+.tl-content {
+  padding-bottom: 28rpx;
+  flex: 1;
+}
+
+.tl-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e293b;
+  display: block;
+  margin-bottom: 6rpx;
+}
+
+.tl-desc {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.guarantee-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.guarantee-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 18rpx 0;
+}
+
+.guarantee-icon {
+  font-size: 40rpx;
+  margin-right: 20rpx;
+  width: 48rpx;
+  text-align: center;
+}
+
+.guarantee-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.guarantee-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6rpx;
+}
+
+.guarantee-desc {
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+.contact-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.contact-icon {
+  font-size: 36rpx;
+  margin-right: 20rpx;
+  width: 44rpx;
+  text-align: center;
+}
+
+.contact-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1e293b;
+}
+
+.contact-arrow {
+  font-size: 36rpx;
+  color: #cbd5e1;
+}
+</style>

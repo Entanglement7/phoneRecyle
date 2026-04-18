@@ -1,0 +1,257 @@
+<template>
+  <view class="container">
+    <view class="page-header">
+      <text class="header-label">估值完成</text>
+      <view class="price-display">
+        <text class="price-hint">回收估值</text>
+        <text class="price-main">¥{{ recyclePrice }}</text>
+      </view>
+      <text class="price-sale">销售参考价：¥{{ salePrice }}</text>
+    </view>
+
+    <view class="card">
+      <text class="card-title">手机参数</text>
+      <view class="info-row">
+        <text class="info-label">机型</text>
+        <text class="info-value">{{ phoneParams.model }}</text>
+      </view>
+      <view class="divider" />
+      <view class="info-row">
+        <text class="info-label">内存 / 存储</text>
+        <text class="info-value">{{ phoneParams.ram }} / {{ phoneParams.storage }}</text>
+      </view>
+      <view class="divider" />
+      <view class="info-row">
+        <text class="info-label">使用时长</text>
+        <text class="info-value">{{ phoneParams.usageMonths }} 个月</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="card-title">状态评估</text>
+      <view class="info-row">
+        <text class="info-label">外观评分</text>
+        <view class="score-tag">
+          <text class="score-tag-text">{{ appearanceScore }} 分</text>
+        </view>
+      </view>
+      <view class="divider" />
+      <view class="info-row">
+        <text class="info-label">电池健康度</text>
+        <view class="score-tag" :class="{ 'score-tag-warn': parseInt(functionStatus.batteryHealth) < 80 }">
+          <text class="score-tag-text">{{ functionStatus.batteryHealth }}%</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="action-row">
+      <button type="primary" class="btn-primary" @click="saveResult">保存结果</button>
+      <button type="default" class="btn-default" @click="newValuation">重新估值</button>
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+
+const phoneParams = ref({
+  model: '华为 Mate 60 Pro',
+  ram: '8GB',
+  storage: '256GB',
+  usageMonths: '6'
+});
+
+const appearanceScore = ref(90);
+const functionStatus = ref({
+  batteryHealth: '95',
+  camera: '正常',
+  fingerprint: '正常',
+  chargingPort: '正常',
+  screen: '正常',
+  speaker: '正常'
+});
+
+const recyclePrice = ref(0);
+const salePrice = ref(0);
+
+onMounted(() => {
+  const savedParams = uni.getStorageSync('phoneParams');
+  const savedAppearance = uni.getStorageSync('appearanceScore');
+  const savedFunction = uni.getStorageSync('functionStatus');
+
+  if (savedParams) phoneParams.value = savedParams;
+  if (savedAppearance) appearanceScore.value = savedAppearance;
+  if (savedFunction) functionStatus.value = savedFunction;
+
+  calculatePrice();
+});
+
+const calculatePrice = () => {
+  const basePrice = 6999;
+  const usageDepreciation = 0.02 * parseInt(phoneParams.value.usageMonths);
+  const appearanceFactor = appearanceScore.value / 100;
+  const batteryFactor = parseInt(functionStatus.value.batteryHealth) / 100;
+
+  recyclePrice.value = Math.floor(basePrice * (1 - usageDepreciation) * appearanceFactor * batteryFactor * 0.8);
+  salePrice.value = Math.floor(basePrice * (1 - usageDepreciation) * appearanceFactor * batteryFactor * 0.9);
+};
+
+const saveResult = () => {
+  const valuationResult = {
+    phoneParams: phoneParams.value,
+    appearanceScore: appearanceScore.value,
+    functionStatus: functionStatus.value,
+    recyclePrice: recyclePrice.value,
+    salePrice: salePrice.value,
+    valuationTime: new Date().toISOString()
+  };
+
+  let history = uni.getStorageSync('valuationHistory') || [];
+  history.push(valuationResult);
+  uni.setStorageSync('valuationHistory', history);
+
+  uni.showToast({ title: '结果已保存', icon: 'success' });
+  setTimeout(() => {
+    uni.switchTab({ url: '/pages/phoneRecyle/tabBar/home/home' });
+  }, 1000);
+};
+
+const newValuation = () => {
+  uni.removeStorageSync('phoneParams');
+  uni.removeStorageSync('appearanceScore');
+  uni.removeStorageSync('functionStatus');
+  uni.navigateTo({ url: '/pages/phoneRecyle/inputParams/inputParams' });
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 0;
+  background-color: #f0f4f8;
+  min-height: 100vh;
+}
+
+.page-header {
+  background-color: #1a56db;
+  padding: 50rpx 40rpx 50rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-label {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 2rpx;
+  margin-bottom: 20rpx;
+}
+
+.price-display {
+  display: flex;
+  align-items: baseline;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.price-hint {
+  font-size: 28rpx;
+  color: rgba(255,255,255,0.7);
+}
+
+.price-main {
+  font-size: 80rpx;
+  font-weight: bold;
+  color: #fbbf24;
+  letter-spacing: -2rpx;
+}
+
+.price-sale {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.6);
+}
+
+.card {
+  background-color: #fff;
+  margin: 24rpx 24rpx 0;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+}
+
+.card-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.divider {
+  height: 1rpx;
+  background-color: #f1f5f9;
+  margin: 4rpx 0;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18rpx 0;
+  font-size: 28rpx;
+}
+
+.info-label {
+  color: #64748b;
+}
+
+.info-value {
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.score-tag {
+  background-color: #ecfdf5;
+  padding: 8rpx 20rpx;
+  border-radius: 100rpx;
+}
+
+.score-tag-warn {
+  background-color: #fff7ed;
+}
+
+.score-tag-text {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #059669;
+}
+
+.score-tag-warn .score-tag-text {
+  color: #d97706;
+}
+
+.action-row {
+  display: flex;
+  gap: 20rpx;
+  padding: 30rpx 24rpx 40rpx;
+}
+
+.btn-primary {
+  flex: 1;
+  padding: 28rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  border-radius: 16rpx;
+  background-color: #1a56db;
+  border: none;
+}
+
+.btn-default {
+  flex: 1;
+  padding: 28rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  border-radius: 16rpx;
+  background-color: #fff;
+  color: #475569;
+  border: 2rpx solid #e2e8f0;
+}
+</style>

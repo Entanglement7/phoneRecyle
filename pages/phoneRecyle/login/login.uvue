@@ -1,0 +1,119 @@
+<template>
+  <view class="container">
+    <view class="login-box">
+      <view class="logo">
+        <text class="logo-icon">📱</text>
+        <text class="logo-text">华为智能估值系统</text>
+        <text class="logo-subtitle">二手机智能回收评估平台</text>
+      </view>
+      <form class="login-form">
+        <view class="form-item">
+          <text class="label">用户名</text>
+          <input type="text" v-model="username" placeholder="请输入用户名" class="input" />
+        </view>
+        <view class="form-item">
+          <text class="label">密码</text>
+          <input type="password" v-model="password" placeholder="请输入密码" class="input" />
+        </view>
+        <button type="primary" class="login-btn" @click="login">登 录</button>
+      </form>
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const username = ref('');
+const password = ref('');
+
+const login = () => {
+  if (username.value && password.value) {
+    uni.setStorageSync('userInfo', { username: username.value });
+    uni.navigateTo({ url: '/pages/phoneRecyle/home/home' });
+  } else {
+    uni.showToast({ title: '请输入用户名和密码', icon: 'none' });
+  }
+};
+</script>
+
+<style scoped>
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #1a56db;
+}
+
+.login-box {
+  width: 86%;
+  max-width: 400px;
+  background-color: #fff;
+  padding: 60rpx 50rpx;
+  border-radius: 32rpx;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.25);
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 16rpx;
+}
+
+.logo-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.logo-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #1a56db;
+  letter-spacing: 2rpx;
+}
+
+.logo-subtitle {
+  font-size: 24rpx;
+  color: #94a3b8;
+  display: block;
+  margin-top: 10rpx;
+  margin-bottom: 50rpx;
+  text-align: center;
+}
+
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.label {
+  display: block;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #475569;
+}
+
+.input {
+  width: 100%;
+  padding: 24rpx 28rpx;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  color: #1e293b;
+  background-color: #f8fafc;
+  box-sizing: border-box;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 40rpx;
+  padding: 28rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  border-radius: 16rpx;
+  background-color: #1a56db;
+  border: none;
+  letter-spacing: 4rpx;
+}
+</style>

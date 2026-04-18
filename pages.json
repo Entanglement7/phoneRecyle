@@ -1,0 +1,105 @@
+{
+	"pages": [
+		// 底部导航栏页面
+		{
+			"path": "pages/phoneRecyle/tabBar/home/home",
+			"style": {
+				"navigationBarTitleText": "首页"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/tabBar/valuationRecord/valuationRecord",
+			"style": {
+				"navigationBarTitleText": "估值记录"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/tabBar/service/service",
+			"style": {
+				"navigationBarTitleText": "服务咨询"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/tabBar/profile/profile",
+			"style": {
+				"navigationBarTitleText": "个人中心"
+			}
+		},
+		
+		// 功能页面
+		{
+			"path": "pages/phoneRecyle/login/login",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/inputParams/inputParams",
+			"style": {
+				"navigationBarTitleText": "手机基础参数录入"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/appearanceDetect/appearanceDetect",
+			"style": {
+				"navigationBarTitleText": "手机外观检测"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/functionTest/functionTest",
+			"style": {
+				"navigationBarTitleText": "功能状态检测"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/valuationResult/valuationResult",
+			"style": {
+				"navigationBarTitleText": "估值结果"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/modelManage/modelManage",
+			"style": {
+				"navigationBarTitleText": "华为机型管理"
+			}
+		},
+		{
+			"path": "pages/phoneRecyle/paramConfig/paramConfig",
+			"style": {
+				"navigationBarTitleText": "估值参数配置"
+			}
+		}
+	],
+	"tabBar": {
+		"color": "#999999",
+		"selectedColor": "#1a56db",
+		"backgroundColor": "#ffffff",
+		"borderStyle": "white",
+		"list": [
+			{
+				"pagePath": "pages/phoneRecyle/tabBar/home/home",
+				"text": "首页",
+				"iconPath": "static/tabbar/home.png",
+				"selectedIconPath": "static/tabbar/home-active.png"
+			},
+			{
+				"pagePath": "pages/phoneRecyle/tabBar/valuationRecord/valuationRecord",
+				"text": "估值记录",
+				"iconPath": "static/tabbar/record.png",
+				"selectedIconPath": "static/tabbar/record-active.png"
+			},
+			{
+				"pagePath": "pages/phoneRecyle/tabBar/service/service",
+				"text": "服务咨询",
+				"iconPath": "static/tabbar/service.png",
+				"selectedIconPath": "static/tabbar/service-active.png"
+			},
+			{
+				"pagePath": "pages/phoneRecyle/tabBar/profile/profile",
+				"text": "个人中心",
+				"iconPath": "static/tabbar/profile.png",
+				"selectedIconPath": "static/tabbar/profile-active.png"
+			}
+		]
+	}
+}

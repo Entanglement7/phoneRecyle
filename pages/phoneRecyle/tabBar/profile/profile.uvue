@@ -1,0 +1,213 @@
+<template>
+  <scroll-view scroll-y class="container">
+    <view class="profile-header">
+      <view class="avatar-wrap">
+        <text class="avatar-text">{{ userInfo.username ? userInfo.username[0] : '用' }}</text>
+      </view>
+      <view class="user-meta">
+        <text class="user-name">{{ userInfo.username || '用户' }}</text>
+        <text class="user-phone">138****8888</text>
+      </view>
+      <button class="edit-btn" @click="editProfile">编辑</button>
+    </view>
+
+    <view class="card">
+      <text class="card-title">我的服务</text>
+      <view class="menu-item" @click="viewValuationHistory">
+        <text class="menu-icon">📱</text>
+        <text class="menu-text">估值历史</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="divider" />
+      <view class="menu-item" @click="viewServiceHistory">
+        <text class="menu-icon">📋</text>
+        <text class="menu-text">服务记录</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="divider" />
+      <view class="menu-item" @click="viewAddress">
+        <text class="menu-icon">📍</text>
+        <text class="menu-text">收货地址</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="card-title">账户设置</text>
+      <view class="menu-item" @click="changePassword">
+        <text class="menu-icon">🔒</text>
+        <text class="menu-text">修改密码</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="divider" />
+      <view class="menu-item" @click="bindPhone">
+        <text class="menu-icon">📞</text>
+        <text class="menu-text">绑定手机</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="divider" />
+      <view class="menu-item" @click="aboutUs">
+        <text class="menu-icon">ℹ️</text>
+        <text class="menu-text">关于我们</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="logout-wrap">
+      <button class="logout-btn" @click="logout">退出登录</button>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+
+const userInfo = ref({ username: '' });
+
+onMounted(() => {
+  const stored = uni.getStorageSync('userInfo');
+  if (stored) userInfo.value = stored;
+});
+
+const editProfile = () => { uni.showToast({ title: '编辑资料功能开发中', icon: 'none' }); };
+const viewValuationHistory = () => { uni.switchTab({ url: '/pages/phoneRecyle/tabBar/valuationRecord/valuationRecord' }); };
+const viewServiceHistory = () => { uni.showToast({ title: '服务记录功能开发中', icon: 'none' }); };
+const viewAddress = () => { uni.showToast({ title: '收货地址功能开发中', icon: 'none' }); };
+const changePassword = () => { uni.showToast({ title: '修改密码功能开发中', icon: 'none' }); };
+const bindPhone = () => { uni.showToast({ title: '绑定手机功能开发中', icon: 'none' }); };
+const aboutUs = () => { uni.showToast({ title: '关于我们功能开发中', icon: 'none' }); };
+
+const logout = () => {
+  uni.showModal({
+    title: '确认退出',
+    content: '确定要退出登录吗？',
+    success: (res) => {
+      if (res.confirm) {
+        uni.removeStorageSync('userInfo');
+        uni.navigateTo({ url: '/pages/phoneRecyle/login/login' });
+      }
+    }
+  });
+};
+</script>
+
+<style scoped>
+.container {
+  background-color: #f5f6fa;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.profile-header {
+  background-color: #1a56db;
+  padding: 40rpx 30rpx 40rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.avatar-wrap {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background-color: rgba(255,255,255,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.avatar-text {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.user-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+
+.user-phone {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.75);
+}
+
+.edit-btn {
+  background-color: rgba(255,255,255,0.2);
+  border: 1rpx solid rgba(255,255,255,0.4);
+  border-radius: 10rpx;
+  padding: 10rpx 24rpx;
+  font-size: 24rpx;
+  color: #fff;
+}
+
+.card {
+  background-color: #fff;
+  margin: 20rpx 24rpx 0;
+  padding: 0 28rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.card-title {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #94a3b8;
+  padding: 20rpx 0 10rpx;
+  display: block;
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 24rpx 0;
+}
+
+.menu-icon {
+  font-size: 36rpx;
+  margin-right: 20rpx;
+  width: 44rpx;
+  text-align: center;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1e293b;
+}
+
+.menu-arrow {
+  font-size: 36rpx;
+  color: #cbd5e1;
+}
+
+.divider {
+  height: 1rpx;
+  background-color: #f1f5f9;
+}
+
+.logout-wrap {
+  padding: 40rpx 24rpx 0;
+}
+
+.logout-btn {
+  width: 100%;
+  background-color: #fff;
+  border: 1rpx solid #fca5a5;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+  color: #ef4444;
+}
+</style>

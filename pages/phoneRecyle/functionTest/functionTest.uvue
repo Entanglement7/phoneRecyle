@@ -1,0 +1,238 @@
+<template>
+  <view class="container">
+    <view class="page-header">
+      <text class="page-title">功能状态检测</text>
+      <text class="page-desc">请如实填写手机各项功能的状态</text>
+    </view>
+    <view class="card form">
+      <view class="form-item">
+        <text class="label">电池健康度</text>
+        <view class="input-wrap">
+          <input type="number" v-model="batteryHealth" placeholder="请输入百分比，如 95" class="input" />
+          <text class="input-suffix">%</text>
+        </view>
+      </view>
+      <view class="divider" />
+      <view class="form-item">
+        <text class="label">摄像头</text>
+        <view class="radio-group">
+          <view class="radio-item" :class="{ active: camera === '正常' }" @click="camera = '正常'">
+            <text class="radio-text">正常</text>
+          </view>
+          <view class="radio-item radio-item-bad" :class="{ 'active-bad': camera === '异常' }" @click="camera = '异常'">
+            <text class="radio-text">异常</text>
+          </view>
+        </view>
+      </view>
+      <view class="divider" />
+      <view class="form-item">
+        <text class="label">指纹识别</text>
+        <view class="radio-group">
+          <view class="radio-item" :class="{ active: fingerprint === '正常' }" @click="fingerprint = '正常'">
+            <text class="radio-text">正常</text>
+          </view>
+          <view class="radio-item radio-item-bad" :class="{ 'active-bad': fingerprint === '异常' }" @click="fingerprint = '异常'">
+            <text class="radio-text">异常</text>
+          </view>
+        </view>
+      </view>
+      <view class="divider" />
+      <view class="form-item">
+        <text class="label">充电口</text>
+        <view class="radio-group">
+          <view class="radio-item" :class="{ active: chargingPort === '正常' }" @click="chargingPort = '正常'">
+            <text class="radio-text">正常</text>
+          </view>
+          <view class="radio-item radio-item-bad" :class="{ 'active-bad': chargingPort === '异常' }" @click="chargingPort = '异常'">
+            <text class="radio-text">异常</text>
+          </view>
+        </view>
+      </view>
+      <view class="divider" />
+      <view class="form-item">
+        <text class="label">屏幕</text>
+        <view class="radio-group">
+          <view class="radio-item" :class="{ active: screen === '正常' }" @click="screen = '正常'">
+            <text class="radio-text">正常</text>
+          </view>
+          <view class="radio-item radio-item-bad" :class="{ 'active-bad': screen === '异常' }" @click="screen = '异常'">
+            <text class="radio-text">异常</text>
+          </view>
+        </view>
+      </view>
+      <view class="divider" />
+      <view class="form-item">
+        <text class="label">扬声器</text>
+        <view class="radio-group">
+          <view class="radio-item" :class="{ active: speaker === '正常' }" @click="speaker = '正常'">
+            <text class="radio-text">正常</text>
+          </view>
+          <view class="radio-item radio-item-bad" :class="{ 'active-bad': speaker === '异常' }" @click="speaker = '异常'">
+            <text class="radio-text">异常</text>
+          </view>
+        </view>
+      </view>
+      <button type="primary" class="submit-btn" @click="submitFunctionTest">提交并查看估值结果</button>
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const batteryHealth = ref('');
+const camera = ref('正常');
+const fingerprint = ref('正常');
+const chargingPort = ref('正常');
+const screen = ref('正常');
+const speaker = ref('正常');
+
+const submitFunctionTest = () => {
+  if (!batteryHealth.value) {
+    uni.showToast({ title: '请输入电池健康度', icon: 'none' });
+    return;
+  }
+
+  const functionStatus = {
+    batteryHealth: batteryHealth.value,
+    camera: camera.value,
+    fingerprint: fingerprint.value,
+    chargingPort: chargingPort.value,
+    screen: screen.value,
+    speaker: speaker.value
+  };
+
+  uni.setStorageSync('functionStatus', functionStatus);
+  uni.showToast({ title: '检测结果提交成功', icon: 'success' });
+  setTimeout(() => {
+    uni.navigateTo({ url: '/pages/phoneRecyle/valuationResult/valuationResult' });
+  }, 1000);
+};
+</script>
+
+<style scoped>
+.container {
+  padding: 0;
+  background-color: #f0f4f8;
+  min-height: 100vh;
+}
+
+.page-header {
+  background-color: #1a56db;
+  padding: 50rpx 40rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.page-desc {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.75);
+  margin-top: 10rpx;
+}
+
+.card {
+  background-color: #fff;
+  margin: 24rpx;
+  padding: 0 28rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+}
+
+.form-item {
+  padding: 28rpx 0 20rpx;
+}
+
+.divider {
+  height: 1rpx;
+  background-color: #f1f5f9;
+}
+
+.label {
+  display: block;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #334155;
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  background-color: #f8fafc;
+  border: 1rpx solid #e2e8f0;
+  border-radius: 14rpx;
+  padding: 0 24rpx;
+}
+
+.input {
+  flex: 1;
+  padding: 22rpx 0;
+  font-size: 28rpx;
+  color: #1e293b;
+}
+
+.input-suffix {
+  font-size: 28rpx;
+  color: #94a3b8;
+  margin-left: 8rpx;
+}
+
+.radio-group {
+  display: flex;
+  gap: 20rpx;
+}
+
+.radio-item {
+  flex: 1;
+  padding: 18rpx;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+}
+
+.radio-item.active {
+  border-color: #10b981;
+  background-color: #ecfdf5;
+}
+
+.radio-item.radio-item-bad.active-bad {
+  border-color: #f43f5e;
+  background-color: #fff1f2;
+}
+
+.radio-text {
+  font-size: 28rpx;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.radio-item.active .radio-text {
+  color: #059669;
+  font-weight: 600;
+}
+
+.radio-item.radio-item-bad.active-bad .radio-text {
+  color: #f43f5e;
+  font-weight: 600;
+}
+
+.submit-btn {
+  width: 100%;
+  margin: 30rpx 0 36rpx;
+  padding: 28rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  border-radius: 16rpx;
+  background-color: #1a56db;
+  border: none;
+}
+</style>
