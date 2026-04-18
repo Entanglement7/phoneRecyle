@@ -1,0 +1,11 @@
+{
+    "name": "uni-login-test-co",
+    "dependencies": {
+        "uni-config-center": "file:..\/..\/..\/uni_modules\/uni-config-center\/uniCloud\/cloudfunctions\/common\/uni-config-center"
+    },
+    "extensions": {},
+    "origin-plugin-dev-name": "hello-uniapp-x",
+    "origin-plugin-version": "1.0.40",
+    "plugin-dev-name": "hello-uniapp-x",
+    "plugin-version": "1.0.40"
+}
