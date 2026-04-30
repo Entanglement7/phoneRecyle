@@ -7,7 +7,22 @@
       "Bash(git add *)",
       "Bash(git reset *)",
       "Bash(git commit -m ' *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(curl -s http://localhost:5000/api/models)",
+      "Bash(ipconfig)",
+      "Bash(netsh advfirewall *)",
+      "Bash(taskkill /F /IM python.exe)",
+      "Bash(curl -s -X POST http://localhost:5000/api/login -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"admin123\"}')",
+      "Bash(curl *)",
+      "Bash(taskkill /F /IM python.exe /T)",
+      "Bash(taskkill /F /IM python3.exe /T)",
+      "Bash(netstat -ano)",
+      "Bash(awk '{print $5}')"
     ]
   }
 }

@@ -68,7 +68,6 @@
           <text class="store-time">营业时间：9:00-18:00</text>
         </view>
       </view>
-      <button class="store-btn" @click="viewStore">查看详情</button>
     </view>
   </scroll-view>
 </template>
@@ -76,9 +75,6 @@
 <script setup>
 const startValuation = () => {
   uni.navigateTo({ url: '/pages/phoneRecyle/inputParams/inputParams' });
-};
-const viewStore = () => {
-  uni.showToast({ title: '门店详情页面开发中', icon: 'none' });
 };
 </script>
 
@@ -271,15 +267,5 @@ const viewStore = () => {
 .store-time {
   font-size: 22rpx;
   color: #94a3b8;
-}
-
-.store-btn {
-  width: 100%;
-  background-color: #f1f5f9;
-  border: 1rpx solid #e2e8f0;
-  border-radius: 12rpx;
-  padding: 18rpx;
-  font-size: 26rpx;
-  color: #475569;
 }
 </style>

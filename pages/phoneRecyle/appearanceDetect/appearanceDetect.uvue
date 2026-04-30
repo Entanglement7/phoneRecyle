@@ -2,95 +2,223 @@
   <view class="container">
     <view class="page-header">
       <text class="page-title">手机外观检测</text>
-      <text class="page-desc">上传手机图片，AI 自动评估外观状态</text>
+      <text class="page-desc">请根据实际情况如实填写，影响最终估值</text>
     </view>
-    <view class="card upload-section">
-      <text class="section-title">上传手机外观图片</text>
-      <text class="section-hint">最多上传 4 张，建议拍摄正面、背面、边框</text>
-      <view class="upload-grid">
-        <view class="upload-item" v-for="(item, index) in imageList" :key="index">
-          <image :src="item" class="uploaded-image" mode="aspectFill" />
-          <view class="delete-btn" @click="deleteImage(index)">×</view>
-        </view>
-        <view class="upload-item upload-btn" @click="chooseImage" v-if="imageList.length < 4">
-          <text class="upload-icon">+</text>
-          <text class="upload-text">添加图片</text>
-        </view>
+
+    <!-- Tips 提示卡片 -->
+    <view class="tips-card">
+      <view class="tips-header">
+        <text class="tips-icon">💡</text>
+        <text class="tips-title">填写说明</text>
+      </view>
+      <view class="tips-list">
+        <text class="tips-item">· 请在光线充足处仔细检查手机各部位</text>
+        <text class="tips-item">· 划痕：用手指轻划屏幕/背面，能感受到凹槽即为划痕</text>
+        <text class="tips-item">· 碰撞：检查四角及边框是否有凹坑、掉漆</text>
+        <text class="tips-item">· 如实填写可获得更准确的估值结果</text>
       </view>
     </view>
-    <button type="primary" class="detect-btn" @click="detectAppearance" :disabled="imageList.length === 0">
-      开始 AI 检测
-    </button>
-    <view class="card result-section" v-if="appearanceScore > 0">
-      <text class="section-title">检测结果</text>
-      <view class="score-card">
-        <view class="score-info">
-          <text class="score-label">外观综合评分</text>
-          <view class="score-row">
-            <text class="score-value">{{ appearanceScore }}</text>
-            <text class="score-unit">/ 100</text>
+
+    <!-- 屏幕状态 -->
+    <view class="card">
+      <view class="section-header">
+        <text class="section-title">屏幕状态</text>
+        <text class="section-required">*必填</text>
+      </view>
+      <view class="tips-inline">
+        <text class="tips-inline-text">💡 点亮屏幕在不同角度观察是否有亮点、暗斑或划痕</text>
+      </view>
+      <view class="option-group">
+        <view
+          class="option-item"
+          v-for="opt in screenOptions"
+          :key="opt.value"
+          :class="{ active: form.screenCondition === opt.value }"
+          @click="form.screenCondition = opt.value"
+        >
+          <view class="option-radio" :class="{ 'radio-active': form.screenCondition === opt.value }" />
+          <view class="option-content">
+            <text class="option-label">{{ opt.label }}</text>
+            <text class="option-desc">{{ opt.desc }}</text>
           </view>
         </view>
-        <view class="score-bar-wrap">
-          <view class="score-bar" :style="{ width: appearanceScore + '%' }" />
-        </view>
       </view>
-      <view class="detail-list">
-        <view class="detail-row">
-          <text class="detail-label">屏幕状态</text>
-          <text class="detail-value good">{{ screenCondition }}</text>
-        </view>
-        <view class="detail-row">
-          <text class="detail-label">机身状态</text>
-          <text class="detail-value warn">{{ bodyCondition }}</text>
-        </view>
-        <view class="detail-row">
-          <text class="detail-label">边框状态</text>
-          <text class="detail-value good">{{ borderCondition }}</text>
-        </view>
-      </view>
-      <button type="primary" class="next-btn" @click="nextStep">下一步：功能检测</button>
     </view>
+
+    <!-- 机身背面状态 -->
+    <view class="card">
+      <view class="section-header">
+        <text class="section-title">机身背面</text>
+        <text class="section-required">*必填</text>
+      </view>
+      <view class="tips-inline">
+        <text class="tips-inline-text">💡 翻转手机，在灯光下观察后盖划痕及磨损情况</text>
+      </view>
+      <view class="option-group">
+        <view
+          class="option-item"
+          v-for="opt in bodyOptions"
+          :key="opt.value"
+          :class="{ active: form.bodyCondition === opt.value }"
+          @click="form.bodyCondition = opt.value"
+        >
+          <view class="option-radio" :class="{ 'radio-active': form.bodyCondition === opt.value }" />
+          <view class="option-content">
+            <text class="option-label">{{ opt.label }}</text>
+            <text class="option-desc">{{ opt.desc }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 边框状态 -->
+    <view class="card">
+      <view class="section-header">
+        <text class="section-title">边框状态</text>
+        <text class="section-required">*必填</text>
+      </view>
+      <view class="tips-inline">
+        <text class="tips-inline-text">💡 检查四角及侧边框是否有碰撞凹坑或掉漆</text>
+      </view>
+      <view class="option-group">
+        <view
+          class="option-item"
+          v-for="opt in borderOptions"
+          :key="opt.value"
+          :class="{ active: form.borderCondition === opt.value }"
+          @click="form.borderCondition = opt.value"
+        >
+          <view class="option-radio" :class="{ 'radio-active': form.borderCondition === opt.value }" />
+          <view class="option-content">
+            <text class="option-label">{{ opt.label }}</text>
+            <text class="option-desc">{{ opt.desc }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 原装配件 -->
+    <view class="card">
+      <view class="section-header">
+        <text class="section-title">原装配件</text>
+        <text class="section-optional">选填</text>
+      </view>
+      <view class="tips-inline">
+        <text class="tips-inline-text">💡 原装配件齐全可提升回收价格</text>
+      </view>
+      <view class="checkbox-group">
+        <view
+          class="checkbox-item"
+          v-for="acc in accessories"
+          :key="acc.value"
+          @click="toggleAccessory(acc.value)"
+        >
+          <view class="checkbox-box" :class="{ 'checkbox-checked': form.accessories.includes(acc.value) }">
+            <text class="checkbox-tick" v-if="form.accessories.includes(acc.value)">✓</text>
+          </view>
+          <text class="checkbox-label">{{ acc.label }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 补充说明 -->
+    <view class="card">
+      <view class="section-header">
+        <text class="section-title">补充说明</text>
+        <text class="section-optional">选填</text>
+      </view>
+      <view class="tips-inline">
+        <text class="tips-inline-text">💡 如有其他损坏或特殊情况请在此说明</text>
+      </view>
+      <textarea
+        class="remark-input"
+        v-model="form.remark"
+        placeholder="例如：左下角有轻微碰撞，屏幕无划痕..."
+        maxlength="200"
+        auto-height
+      />
+      <text class="word-count">{{ form.remark.length }}/200</text>
+    </view>
+
+    <button
+      type="primary"
+      class="submit-btn"
+      :disabled="!canSubmit"
+      @click="submitForm"
+    >
+      下一步：功能检测
+    </button>
   </view>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
-const imageList = ref([]);
-const appearanceScore = ref(0);
-const screenCondition = ref('');
-const bodyCondition = ref('');
-const borderCondition = ref('');
+const screenOptions = [
+  { value: 'perfect', label: '完好无损', desc: '无任何划痕、亮点或暗斑' },
+  { value: 'minor',   label: '轻微划痕', desc: '正常使用痕迹，正视不明显' },
+  { value: 'obvious', label: '明显划痕', desc: '划痕肉眼可见，不影响使用' },
+  { value: 'damaged', label: '屏幕损坏', desc: '碎屏、漏液或触控异常' },
+];
 
-const chooseImage = () => {
-  uni.chooseImage({
-    count: 4 - imageList.value.length,
-    sizeType: ['compressed'],
-    success: (res) => {
-      imageList.value = [...imageList.value, ...res.tempFilePaths];
-    }
+const bodyOptions = [
+  { value: 'perfect', label: '全新无痕', desc: '后盖无任何划痕磨损' },
+  { value: 'minor',   label: '轻微磨损', desc: '细小痕迹，整体美观' },
+  { value: 'obvious', label: '明显划痕', desc: '划痕明显可见' },
+  { value: 'damaged', label: '严重损坏', desc: '后盖破裂或大面积掉漆' },
+];
+
+const borderOptions = [
+  { value: 'perfect', label: '无碰撞', desc: '边框完好，无任何碰撞痕迹' },
+  { value: 'minor',   label: '轻微磕碰', desc: '轻微磕碰，不影响外观' },
+  { value: 'obvious', label: '明显碰撞', desc: '凹坑或掉漆，肉眼可见' },
+  { value: 'damaged', label: '严重变形', desc: '边框弯曲或大面积损坏' },
+];
+
+const accessories = [
+  { value: 'box',     label: '原装包装盒' },
+  { value: 'charger', label: '原装充电器' },
+  { value: 'cable',   label: '原装数据线' },
+  { value: 'earphone',label: '原装耳机' },
+];
+
+const scoreMap = { perfect: 100, minor: 80, obvious: 60, damaged: 30 };
+
+const form = ref({
+  screenCondition: '',
+  bodyCondition: '',
+  borderCondition: '',
+  accessories: [],
+  remark: '',
+});
+
+const canSubmit = computed(() =>
+  form.value.screenCondition !== '' &&
+  form.value.bodyCondition !== '' &&
+  form.value.borderCondition !== ''
+);
+
+const toggleAccessory = (val) => {
+  const list = form.value.accessories;
+  const idx = list.indexOf(val);
+  if (idx === -1) list.push(val);
+  else list.splice(idx, 1);
+};
+
+const submitForm = () => {
+  const s = scoreMap[form.value.screenCondition];
+  const b = scoreMap[form.value.bodyCondition];
+  const f = scoreMap[form.value.borderCondition];
+  const accessoryBonus = form.value.accessories.length * 2;
+  const appearanceScore = Math.min(100, Math.round((s * 0.5 + b * 0.3 + f * 0.2) + accessoryBonus));
+
+  uni.setStorageSync('appearanceScore', appearanceScore);
+  uni.setStorageSync('appearanceDetail', {
+    screenCondition: screenOptions.find(o => o.value === form.value.screenCondition)?.label,
+    bodyCondition:   bodyOptions.find(o => o.value === form.value.bodyCondition)?.label,
+    borderCondition: borderOptions.find(o => o.value === form.value.borderCondition)?.label,
   });
-};
 
-const deleteImage = (index) => {
-  imageList.value.splice(index, 1);
-};
-
-const detectAppearance = () => {
-  uni.showLoading({ title: '检测中...' });
-  setTimeout(() => {
-    uni.hideLoading();
-    appearanceScore.value = Math.floor(Math.random() * 20) + 80;
-    screenCondition.value = '良好';
-    bodyCondition.value = '轻微划痕';
-    borderCondition.value = '正常';
-    uni.setStorageSync('appearanceScore', appearanceScore.value);
-    uni.showToast({ title: '检测完成', icon: 'success' });
-  }, 2000);
-};
-
-const nextStep = () => {
   uni.navigateTo({ url: '/pages/phoneRecyle/functionTest/functionTest' });
 };
 </script>
@@ -121,175 +249,214 @@ const nextStep = () => {
   margin-top: 10rpx;
 }
 
+/* Tips 卡片 */
+.tips-card {
+  background-color: #fffbeb;
+  margin: 24rpx 24rpx 0;
+  padding: 28rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid #fde68a;
+}
+
+.tips-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.tips-icon {
+  font-size: 32rpx;
+  margin-right: 10rpx;
+}
+
+.tips-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #92400e;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.tips-item {
+  font-size: 24rpx;
+  color: #78350f;
+  line-height: 1.6;
+}
+
+/* 通用卡片 */
 .card {
   background-color: #fff;
-  margin: 24rpx;
+  margin: 24rpx 24rpx 0;
   padding: 32rpx;
   border-radius: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.07);
+}
+
+.section-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 12rpx;
 }
 
 .section-title {
   font-size: 30rpx;
   font-weight: bold;
   color: #1e293b;
-  margin-bottom: 8rpx;
-  display: block;
 }
 
-.section-hint {
+.section-required {
+  font-size: 22rpx;
+  color: #ef4444;
+  margin-left: 12rpx;
+}
+
+.section-optional {
   font-size: 22rpx;
   color: #94a3b8;
-  margin-bottom: 28rpx;
-  display: block;
+  margin-left: 12rpx;
 }
 
-.upload-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20rpx;
-}
-
-.upload-item {
-  width: 100%;
-  height: 220rpx;
-  border: 2rpx dashed #cbd5e1;
-  border-radius: 16rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.uploaded-image {
-  width: 100%;
-  height: 100%;
-  border-radius: 14rpx;
-}
-
-.delete-btn {
-  position: absolute;
-  top: 10rpx;
-  right: 10rpx;
-  width: 44rpx;
-  height: 44rpx;
-  background-color: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32rpx;
-  font-weight: bold;
-}
-
-.upload-btn {
-  background-color: #f8fafc;
-}
-
-.upload-icon {
-  font-size: 64rpx;
-  color: #a855f7;
-  margin-bottom: 8rpx;
-}
-
-.upload-text {
-  font-size: 24rpx;
-  color: #94a3b8;
-}
-
-.detect-btn {
-  width: calc(100% - 48rpx);
-  margin: 0 24rpx 24rpx;
-  padding: 28rpx;
-  font-size: 30rpx;
-  font-weight: bold;
-  border-radius: 16rpx;
-  background-color: #1a56db;
-  border: none;
-}
-
-.score-card {
-  background-color: #eff6ff;
-  padding: 28rpx;
-  border-radius: 16rpx;
-  margin-bottom: 28rpx;
-}
-
-.score-info {
-  margin-bottom: 16rpx;
-}
-
-.score-label {
-  font-size: 26rpx;
-  color: #6d28d9;
-  display: block;
-  margin-bottom: 8rpx;
-}
-
-.score-row {
-  display: flex;
-  align-items: baseline;
-}
-
-.score-value {
-  font-size: 60rpx;
-  font-weight: bold;
-  color: #7c3aed;
-}
-
-.score-unit {
-  font-size: 26rpx;
-  color: #a78bfa;
-  margin-left: 6rpx;
-}
-
-.score-bar-wrap {
-  height: 12rpx;
-  background-color: #ddd6fe;
-  border-radius: 6rpx;
-  overflow: hidden;
-}
-
-.score-bar {
-  height: 100%;
-  background-color: #1a56db;
-  border-radius: 6rpx;
-}
-
-.detail-list {
+.tips-inline {
+  background-color: #f0f9ff;
+  border-radius: 10rpx;
+  padding: 14rpx 18rpx;
   margin-bottom: 24rpx;
 }
 
-.detail-row {
+.tips-inline-text {
+  font-size: 22rpx;
+  color: #0369a1;
+  line-height: 1.5;
+}
+
+/* 单选选项 */
+.option-group {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.option-item {
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  padding: 16rpx 0;
-  border-bottom: 1rpx solid #f1f5f9;
+  padding: 20rpx;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 16rpx;
+  background-color: #f8fafc;
+}
+
+.option-item.active {
+  border-color: #1a56db;
+  background-color: #eff6ff;
+}
+
+.option-radio {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 4rpx solid #cbd5e1;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.option-radio.radio-active {
+  border-color: #1a56db;
+  background-color: #1a56db;
+  box-shadow: inset 0 0 0 6rpx #fff;
+}
+
+.option-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.option-label {
   font-size: 28rpx;
-}
-
-.detail-label {
-  color: #64748b;
-}
-
-.detail-value {
   font-weight: 600;
+  color: #1e293b;
 }
 
-.detail-value.good {
-  color: #16a34a;
+.option-desc {
+  font-size: 22rpx;
+  color: #64748b;
+  margin-top: 4rpx;
 }
 
-.detail-value.warn {
-  color: #d97706;
+/* 复选框 */
+.checkbox-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20rpx;
 }
 
-.next-btn {
+.checkbox-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: calc(50% - 10rpx);
+}
+
+.checkbox-box {
+  width: 36rpx;
+  height: 36rpx;
+  border: 4rpx solid #cbd5e1;
+  border-radius: 8rpx;
+  margin-right: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkbox-box.checkbox-checked {
+  background-color: #1a56db;
+  border-color: #1a56db;
+}
+
+.checkbox-tick {
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: bold;
+}
+
+.checkbox-label {
+  font-size: 26rpx;
+  color: #334155;
+}
+
+/* 文本域 */
+.remark-input {
   width: 100%;
+  min-height: 120rpx;
+  background-color: #f8fafc;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  font-size: 26rpx;
+  color: #334155;
+  box-sizing: border-box;
+}
+
+.word-count {
+  font-size: 20rpx;
+  color: #94a3b8;
+  text-align: right;
+  display: block;
+  margin-top: 8rpx;
+}
+
+/* 提交按钮 */
+.submit-btn {
+  width: calc(100% - 48rpx);
+  margin: 32rpx 24rpx 48rpx;
   padding: 28rpx;
   font-size: 30rpx;
   font-weight: bold;

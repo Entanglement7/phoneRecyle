@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - db_data:/app/data
+    environment:
+      - JWT_SECRET=change-this-secret-in-production
+      - DB_PATH=/app/data/phone_recycle.db
+    restart: unless-stopped
+
+volumes:
+  db_data:

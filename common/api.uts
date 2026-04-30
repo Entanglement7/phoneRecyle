@@ -1,0 +1,84 @@
+// 后端地址，开发时改为本机 IP（手机调试需要局域网 IP，不能用 localhost）
+// H5本地开发用 localhost，真机调试改为局域网 IP
+export const BASE_URL = 'http://localhost:5000'
+// export const BASE_URL = 'http://192.168.125.116:5000'
+
+// ── token 管理 ────────────────────────────────────────────
+
+export const getToken = (): string => uni.getStorageSync('token') ?? ''
+
+export const setToken = (token: string) => uni.setStorageSync('token', token)
+
+export const clearToken = () => {
+  uni.removeStorageSync('token')
+  uni.removeStorageSync('userInfo')
+}
+
+// ── 统一请求封装 ──────────────────────────────────────────
+
+type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+interface ApiResponse<T = any> {
+  code: number
+  msg: string
+  data: T
+}
+
+export function request<T = any>(
+  method: Method,
+  path: string,
+  data?: object
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    uni.request({
+      url: BASE_URL + path,
+      method,
+      data,
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      success: (res) => {
+        const body = res.data as ApiResponse<T>
+        if (res.statusCode === 401) {
+          clearToken()
+          uni.reLaunch({ url: '/pages/phoneRecyle/login/login' })
+          return reject(new Error('未登录'))
+        }
+        if (body.code !== 0) {
+          uni.showToast({ title: body.msg || '请求失败', icon: 'none' })
+          return reject(new Error(body.msg))
+        }
+        resolve(body.data)
+      },
+      fail: () => {
+        uni.showToast({ title: '网络错误，请检查连接', icon: 'none' })
+        reject(new Error('network error'))
+      },
+    })
+  })
+}
+
+export const api = {
+  // 用户
+  login:          (username: string, password: string) =>
+    request('POST', '/api/login', { username, password }),
+  register:       (username: string, password: string) =>
+    request('POST', '/api/register', { username, password }),
+  changePassword: (old_password: string, new_password: string) =>
+    request('POST', '/api/change-password', { old_password, new_password }),
+  me:             () => request('GET', '/api/me'),
+  updateProfile:  (data: object) => request('POST', '/api/profile', data),
+
+  // 机型
+  getModels:  () => request<{id:number,name:string}[]>('GET', '/api/models'),
+  getModelSpecs: () => request<Record<string, string[][]>>('GET', '/api/models/specs'),
+  addModel:   (name: string) => request('POST', '/api/models', { name }),
+  delModel:   (id: number)   => request('DELETE', `/api/models/${id}`),
+
+  // 估值
+  valuate:        (params: object) => request('POST', '/api/valuate', params),
+  getValuations:  () => request('GET', '/api/valuations'),
+  getValuation:   (id: number) => request('GET', `/api/valuations/${id}`),
+  delValuation:   (id: number) => request('DELETE', `/api/valuations/${id}`),
+}

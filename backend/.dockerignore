@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*.pyo
+phone_recycle.db
+.env

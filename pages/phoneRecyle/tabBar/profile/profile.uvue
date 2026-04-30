@@ -1,16 +1,19 @@
 <template>
   <scroll-view scroll-y class="container">
+    <!-- 头部 -->
     <view class="profile-header">
-      <view class="avatar-wrap">
-        <text class="avatar-text">{{ userInfo.username ? userInfo.username[0] : '用' }}</text>
+      <view class="avatar-wrap" @click="showEditProfile = true">
+        <image v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar-img" mode="aspectFill" />
+        <text v-else class="avatar-text">{{ displayInitial }}</text>
+        <view class="avatar-edit-badge"><text class="avatar-edit-icon">✎</text></view>
       </view>
       <view class="user-meta">
-        <text class="user-name">{{ userInfo.username || '用户' }}</text>
-        <text class="user-phone">138****8888</text>
+        <text class="user-name">{{ userInfo.nickname || userInfo.username || '用户' }}</text>
+        <text class="user-id">账号：{{ userInfo.username }}</text>
       </view>
-      <button class="edit-btn" @click="editProfile">编辑</button>
     </view>
 
+    <!-- 我的服务 -->
     <view class="card">
       <text class="card-title">我的服务</text>
       <view class="menu-item" @click="viewValuationHistory">
@@ -18,73 +21,250 @@
         <text class="menu-text">估值历史</text>
         <text class="menu-arrow">›</text>
       </view>
-      <view class="divider" />
-      <view class="menu-item" @click="viewServiceHistory">
-        <text class="menu-icon">📋</text>
-        <text class="menu-text">服务记录</text>
-        <text class="menu-arrow">›</text>
-      </view>
-      <view class="divider" />
-      <view class="menu-item" @click="viewAddress">
-        <text class="menu-icon">📍</text>
-        <text class="menu-text">收货地址</text>
-        <text class="menu-arrow">›</text>
-      </view>
     </view>
 
+    <!-- 账户设置 -->
     <view class="card">
       <text class="card-title">账户设置</text>
-      <view class="menu-item" @click="changePassword">
+      <view class="menu-item" @click="showEditProfile = true">
+        <text class="menu-icon">👤</text>
+        <text class="menu-text">编辑个人资料</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="divider" />
+      <view class="menu-item" @click="showChangePwd = true">
         <text class="menu-icon">🔒</text>
         <text class="menu-text">修改密码</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="divider" />
-      <view class="menu-item" @click="bindPhone">
+      <view class="menu-item" @click="showBindPhone = true">
         <text class="menu-icon">📞</text>
         <text class="menu-text">绑定手机</text>
-        <text class="menu-arrow">›</text>
-      </view>
-      <view class="divider" />
-      <view class="menu-item" @click="aboutUs">
-        <text class="menu-icon">ℹ️</text>
-        <text class="menu-text">关于我们</text>
-        <text class="menu-arrow">›</text>
+        <view class="menu-right">
+          <text class="menu-tag">{{ userInfo.phone || '未绑定' }}</text>
+          <text class="menu-arrow">›</text>
+        </view>
       </view>
     </view>
 
     <view class="logout-wrap">
       <button class="logout-btn" @click="logout">退出登录</button>
     </view>
+
+    <!-- 编辑个人资料弹窗 -->
+    <view v-if="showEditProfile" class="modal-mask" @click.self="closeEditProfile">
+      <view class="modal-panel">
+        <text class="modal-title">编辑个人资料</text>
+
+        <!-- 头像选择 -->
+        <view class="avatar-picker" @click="pickAvatar">
+          <view class="avatar-preview">
+            <image v-if="editForm.avatar" :src="editForm.avatar" class="avatar-preview-img" mode="aspectFill" />
+            <text v-else class="avatar-preview-text">{{ displayInitial }}</text>
+          </view>
+          <text class="avatar-picker-hint">点击更换头像</text>
+        </view>
+
+        <view class="modal-field">
+          <text class="modal-label">昵称</text>
+          <view class="modal-input-box">
+            <input v-model="editForm.nickname" placeholder="请输入昵称" placeholder-style="color:#94a3b8;" class="modal-input" maxlength="20" />
+          </view>
+        </view>
+
+        <view class="modal-actions">
+          <button class="modal-btn-cancel" @click="closeEditProfile">取消</button>
+          <button class="modal-btn-confirm" :disabled="profileLoading" @click="submitEditProfile">
+            {{ profileLoading ? '保存中...' : '保存' }}
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 修改密码弹窗 -->
+    <view v-if="showChangePwd" class="modal-mask" @click.self="closePwd">
+      <view class="modal-panel">
+        <text class="modal-title">修改密码</text>
+        <view class="modal-field">
+          <text class="modal-label">原密码</text>
+          <view class="modal-input-box">
+            <input v-model="pwd.old" type="password" placeholder="请输入原密码" placeholder-style="color:#94a3b8;" class="modal-input" />
+          </view>
+        </view>
+        <view class="modal-field">
+          <text class="modal-label">新密码</text>
+          <view class="modal-input-box">
+            <input v-model="pwd.new1" type="password" placeholder="至少6位" placeholder-style="color:#94a3b8;" class="modal-input" />
+          </view>
+        </view>
+        <view class="modal-field">
+          <text class="modal-label">确认新密码</text>
+          <view class="modal-input-box">
+            <input v-model="pwd.new2" type="password" placeholder="再次输入新密码" placeholder-style="color:#94a3b8;" class="modal-input" />
+          </view>
+        </view>
+        <view class="modal-actions">
+          <button class="modal-btn-cancel" @click="closePwd">取消</button>
+          <button class="modal-btn-confirm" :disabled="pwdLoading" @click="submitChangePwd">
+            {{ pwdLoading ? '提交中...' : '确认修改' }}
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 绑定手机弹窗 -->
+    <view v-if="showBindPhone" class="modal-mask" @click.self="closePhone">
+      <view class="modal-panel">
+        <text class="modal-title">绑定手机号</text>
+        <view class="modal-field">
+          <text class="modal-label">手机号</text>
+          <view class="modal-input-box">
+            <input v-model="phoneNum" type="number" placeholder="请输入手机号" placeholder-style="color:#94a3b8;" class="modal-input" maxlength="11" />
+          </view>
+        </view>
+        <view class="modal-actions">
+          <button class="modal-btn-cancel" @click="closePhone">取消</button>
+          <button class="modal-btn-confirm" @click="submitBindPhone">确认绑定</button>
+        </view>
+      </view>
+    </view>
   </scroll-view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { api, clearToken } from '@/common/api.uts';
 
-const userInfo = ref({ username: '' });
+const userInfo = ref({ username: '', nickname: '', avatar: '', phone: '' });
 
-onMounted(() => {
-  const stored = uni.getStorageSync('userInfo');
-  if (stored) userInfo.value = stored;
+const displayInitial = computed(() => {
+  const name = userInfo.value.nickname || userInfo.value.username || '用';
+  return name[0].toUpperCase();
 });
 
-const editProfile = () => { uni.showToast({ title: '编辑资料功能开发中', icon: 'none' }); };
-const viewValuationHistory = () => { uni.switchTab({ url: '/pages/phoneRecyle/tabBar/valuationRecord/valuationRecord' }); };
-const viewServiceHistory = () => { uni.showToast({ title: '服务记录功能开发中', icon: 'none' }); };
-const viewAddress = () => { uni.showToast({ title: '收货地址功能开发中', icon: 'none' }); };
-const changePassword = () => { uni.showToast({ title: '修改密码功能开发中', icon: 'none' }); };
-const bindPhone = () => { uni.showToast({ title: '绑定手机功能开发中', icon: 'none' }); };
-const aboutUs = () => { uni.showToast({ title: '关于我们功能开发中', icon: 'none' }); };
+onMounted(async () => {
+  const stored = uni.getStorageSync('userInfo');
+  if (stored) userInfo.value = { ...userInfo.value, ...stored };
+  try {
+    const me = await api.me();
+    userInfo.value = { ...userInfo.value, ...me };
+    uni.setStorageSync('userInfo', userInfo.value);
+  } catch {}
+});
 
+const viewValuationHistory = () => {
+  uni.switchTab({ url: '/pages/phoneRecyle/tabBar/valuationRecord/valuationRecord' });
+};
+
+// 编辑个人资料
+const showEditProfile = ref(false);
+const profileLoading = ref(false);
+const editForm = ref({ nickname: '', avatar: '' });
+
+const openEditProfile = () => {
+  editForm.value = { nickname: userInfo.value.nickname || '', avatar: userInfo.value.avatar || '' };
+  showEditProfile.value = true;
+};
+
+const closeEditProfile = () => {
+  showEditProfile.value = false;
+};
+
+const pickAvatar = () => {
+  uni.chooseImage({
+    count: 1,
+    sizeType: ['compressed'],
+    sourceType: ['album', 'camera'],
+    success: (res) => {
+      const path = res.tempFilePaths[0];
+      uni.getFileSystemManager().readFile({
+        filePath: path,
+        encoding: 'base64',
+        success: (r) => {
+          editForm.value.avatar = 'data:image/jpeg;base64,' + r.data;
+        },
+        fail: () => {
+          editForm.value.avatar = path;
+        }
+      });
+    }
+  });
+};
+
+const submitEditProfile = async () => {
+  profileLoading.value = true;
+  try {
+    await api.updateProfile({
+      nickname: editForm.value.nickname,
+      avatar:   editForm.value.avatar,
+      phone:    userInfo.value.phone || '',
+    });
+    userInfo.value = { ...userInfo.value, nickname: editForm.value.nickname, avatar: editForm.value.avatar };
+    uni.setStorageSync('userInfo', userInfo.value);
+    uni.showToast({ title: '保存成功', icon: 'success' });
+    closeEditProfile();
+  } finally {
+    profileLoading.value = false;
+  }
+};
+
+// 修改密码
+const showChangePwd = ref(false);
+const pwdLoading = ref(false);
+const pwd = ref({ old: '', new1: '', new2: '' });
+
+const closePwd = () => {
+  showChangePwd.value = false;
+  pwd.value = { old: '', new1: '', new2: '' };
+};
+
+const submitChangePwd = async () => {
+  if (!pwd.value.old) { uni.showToast({ title: '请输入原密码', icon: 'none' }); return; }
+  if (pwd.value.new1.length < 6) { uni.showToast({ title: '新密码不能少于6位', icon: 'none' }); return; }
+  if (pwd.value.new1 !== pwd.value.new2) { uni.showToast({ title: '两次密码不一致', icon: 'none' }); return; }
+  pwdLoading.value = true;
+  try {
+    await api.changePassword(pwd.value.old, pwd.value.new1);
+    uni.showToast({ title: '密码修改成功', icon: 'success' });
+    closePwd();
+  } finally {
+    pwdLoading.value = false;
+  }
+};
+
+// 绑定手机
+const showBindPhone = ref(false);
+const phoneNum = ref('');
+
+const closePhone = () => { showBindPhone.value = false; phoneNum.value = ''; };
+
+const submitBindPhone = async () => {
+  if (!/^1[3-9]\d{9}$/.test(phoneNum.value)) {
+    uni.showToast({ title: '请输入正确的手机号', icon: 'none' }); return;
+  }
+  try {
+    await api.updateProfile({
+      nickname: userInfo.value.nickname || '',
+      avatar:   userInfo.value.avatar || '',
+      phone:    phoneNum.value,
+    });
+    userInfo.value = { ...userInfo.value, phone: phoneNum.value };
+    uni.setStorageSync('userInfo', userInfo.value);
+    uni.showToast({ title: '绑定成功', icon: 'success' });
+    closePhone();
+  } catch {}
+};
+
+// 退出登录
 const logout = () => {
   uni.showModal({
     title: '确认退出',
     content: '确定要退出登录吗？',
     success: (res) => {
       if (res.confirm) {
-        uni.removeStorageSync('userInfo');
-        uni.navigateTo({ url: '/pages/phoneRecyle/login/login' });
+        clearToken();
+        uni.reLaunch({ url: '/pages/phoneRecyle/login/login' });
       }
     }
   });
@@ -100,28 +280,58 @@ const logout = () => {
 
 .profile-header {
   background-color: #1a56db;
-  padding: 40rpx 30rpx 40rpx;
+  padding: 50rpx 30rpx 40rpx;
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
 .avatar-wrap {
-  width: 96rpx;
-  height: 96rpx;
+  position: relative;
+  width: 100rpx;
+  height: 100rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.avatar-img {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(255,255,255,0.5);
+}
+
+.avatar-text {
+  width: 100rpx;
+  height: 100rpx;
   border-radius: 50%;
   background-color: rgba(255,255,255,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 24rpx;
-  flex-shrink: 0;
-}
-
-.avatar-text {
   font-size: 40rpx;
   font-weight: bold;
   color: #fff;
+  text-align: center;
+  line-height: 100rpx;
+}
+
+.avatar-edit-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-edit-icon {
+  font-size: 18rpx;
+  color: #1a56db;
 }
 
 .user-meta {
@@ -137,18 +347,9 @@ const logout = () => {
   margin-bottom: 8rpx;
 }
 
-.user-phone {
-  font-size: 24rpx;
-  color: rgba(255,255,255,0.75);
-}
-
-.edit-btn {
-  background-color: rgba(255,255,255,0.2);
-  border: 1rpx solid rgba(255,255,255,0.4);
-  border-radius: 10rpx;
-  padding: 10rpx 24rpx;
-  font-size: 24rpx;
-  color: #fff;
+.user-id {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.7);
 }
 
 .card {
@@ -160,7 +361,7 @@ const logout = () => {
 }
 
 .card-title {
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #94a3b8;
   padding: 20rpx 0 10rpx;
@@ -174,33 +375,14 @@ const logout = () => {
   padding: 24rpx 0;
 }
 
-.menu-icon {
-  font-size: 36rpx;
-  margin-right: 20rpx;
-  width: 44rpx;
-  text-align: center;
-}
+.menu-icon { font-size: 34rpx; margin-right: 20rpx; width: 44rpx; text-align: center; }
+.menu-text { flex: 1; font-size: 28rpx; color: #1e293b; }
+.menu-right { display: flex; flex-direction: row; align-items: center; gap: 8rpx; }
+.menu-tag { font-size: 24rpx; color: #94a3b8; }
+.menu-arrow { font-size: 36rpx; color: #cbd5e1; }
+.divider { height: 1rpx; background-color: #f1f5f9; }
 
-.menu-text {
-  flex: 1;
-  font-size: 28rpx;
-  color: #1e293b;
-}
-
-.menu-arrow {
-  font-size: 36rpx;
-  color: #cbd5e1;
-}
-
-.divider {
-  height: 1rpx;
-  background-color: #f1f5f9;
-}
-
-.logout-wrap {
-  padding: 40rpx 24rpx 0;
-}
-
+.logout-wrap { padding: 40rpx 24rpx 0; }
 .logout-btn {
   width: 100%;
   background-color: #fff;
@@ -209,5 +391,121 @@ const logout = () => {
   padding: 24rpx;
   font-size: 28rpx;
   color: #ef4444;
+}
+
+/* 弹窗 */
+.modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  padding: 0 40rpx;
+}
+
+.modal-panel {
+  background-color: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx 36rpx 32rpx;
+  width: 100%;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 32rpx;
+  display: block;
+  text-align: center;
+}
+
+/* 头像选择 */
+.avatar-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28rpx;
+}
+
+.avatar-preview {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-preview-img {
+  width: 120rpx;
+  height: 120rpx;
+}
+
+.avatar-preview-text {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #94a3b8;
+}
+
+.avatar-picker-hint {
+  font-size: 22rpx;
+  color: #1a56db;
+}
+
+.modal-field { margin-bottom: 24rpx; }
+.modal-label { font-size: 24rpx; color: #64748b; margin-bottom: 10rpx; display: block; }
+
+.modal-input-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #f8fafc;
+  border: 1rpx solid #e2e8f0;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  height: 80rpx;
+}
+
+.modal-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  color: #1e293b;
+  background-color: transparent;
+  height: 80rpx;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 20rpx;
+  margin-top: 12rpx;
+}
+
+.modal-btn-cancel {
+  flex: 1;
+  background-color: #f1f5f9;
+  border: none;
+  border-radius: 12rpx;
+  padding: 22rpx;
+  font-size: 28rpx;
+  color: #475569;
+}
+
+.modal-btn-confirm {
+  flex: 1;
+  background-color: #1a56db;
+  border: none;
+  border-radius: 12rpx;
+  padding: 22rpx;
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 600;
 }
 </style>

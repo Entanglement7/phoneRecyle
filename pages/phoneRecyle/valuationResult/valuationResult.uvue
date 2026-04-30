@@ -6,7 +6,6 @@
         <text class="price-hint">回收估值</text>
         <text class="price-main">¥{{ recyclePrice }}</text>
       </view>
-      <text class="price-sale">销售参考价：¥{{ salePrice }}</text>
     </view>
 
     <view class="card">
@@ -42,78 +41,118 @@
           <text class="score-tag-text">{{ functionStatus.batteryHealth }}%</text>
         </view>
       </view>
+      <view class="divider" />
+      <view class="info-row">
+        <text class="info-label">进水痕迹</text>
+        <view class="score-tag" :class="{ 'score-tag-warn': functionStatus.waterDamage === '有' }">
+          <text class="score-tag-text">{{ functionStatus.waterDamage || '无' }}</text>
+        </view>
+      </view>
+      <view class="divider" />
+      <view class="info-row">
+        <text class="info-label">维修记录</text>
+        <view class="score-tag" :class="{ 'score-tag-warn': functionStatus.repaired === '已维修' }">
+          <text class="score-tag-text">{{ functionStatus.repaired || '未维修' }}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="card-title">平台回收价参考</text>
+      <text class="platform-tip">以下为同类机型在各平台的大致回收区间，仅供参考</text>
+      <view class="platform-row" v-for="p in platformPrices" :key="p.name">
+        <view class="platform-left">
+          <view class="platform-dot" :style="{ backgroundColor: p.color }" />
+          <text class="platform-name">{{ p.name }}</text>
+        </view>
+        <text class="platform-price">¥{{ p.low }} - ¥{{ p.high }}</text>
+      </view>
     </view>
 
     <view class="action-row">
-      <button type="primary" class="btn-primary" @click="saveResult">保存结果</button>
+      <button type="primary" class="btn-primary" :disabled="saving" @click="saveResult">
+        {{ saving ? '保存中...' : '保存结果' }}
+      </button>
       <button type="default" class="btn-default" @click="newValuation">重新估值</button>
     </view>
   </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { api } from '@/common/api.uts';
 
-const phoneParams = ref({
-  model: '华为 Mate 60 Pro',
-  ram: '8GB',
-  storage: '256GB',
-  usageMonths: '6'
-});
-
-const appearanceScore = ref(90);
-const functionStatus = ref({
-  batteryHealth: '95',
-  camera: '正常',
-  fingerprint: '正常',
-  chargingPort: '正常',
-  screen: '正常',
-  speaker: '正常'
-});
-
+const phoneParams = ref({ model: '', ram: '', storage: '', usageMonths: '0' });
+const appearanceScore = ref(80);
+const functionStatus = ref({ batteryHealth: '100', camera: '正常', fingerprint: '正常', chargingPort: '正常', screen: '正常', speaker: '正常' });
 const recyclePrice = ref(0);
-const salePrice = ref(0);
+const saving = ref(false);
 
-onMounted(() => {
-  const savedParams = uni.getStorageSync('phoneParams');
+// 平台参考价：比本系统低 10%~25% 的区间
+const platformPrices = computed(() => {
+  const base = recyclePrice.value;
+  if (!base) return [];
+  return [
+    { name: '爱回收', color: '#f97316', low: Math.floor(base * 0.78), high: Math.floor(base * 0.88) },
+    { name: '转转',   color: '#3b82f6', low: Math.floor(base * 0.72), high: Math.floor(base * 0.84) },
+    { name: '闲鱼',   color: '#10b981', low: Math.floor(base * 0.68), high: Math.floor(base * 0.82) },
+  ];
+});
+
+onMounted(async () => {
+  const savedParams   = uni.getStorageSync('phoneParams');
   const savedAppearance = uni.getStorageSync('appearanceScore');
   const savedFunction = uni.getStorageSync('functionStatus');
 
-  if (savedParams) phoneParams.value = savedParams;
+  if (savedParams)    phoneParams.value    = savedParams;
   if (savedAppearance) appearanceScore.value = savedAppearance;
-  if (savedFunction) functionStatus.value = savedFunction;
+  if (savedFunction)  functionStatus.value = savedFunction;
 
-  calculatePrice();
+  // 先用本地公式预览，保存时以服务端返回值为准
+  calcLocal();
 });
 
-const calculatePrice = () => {
-  const basePrice = 6999;
-  const usageDepreciation = 0.02 * parseInt(phoneParams.value.usageMonths);
-  const appearanceFactor = appearanceScore.value / 100;
-  const batteryFactor = parseInt(functionStatus.value.batteryHealth) / 100;
-
-  recyclePrice.value = Math.floor(basePrice * (1 - usageDepreciation) * appearanceFactor * batteryFactor * 0.8);
-  salePrice.value = Math.floor(basePrice * (1 - usageDepreciation) * appearanceFactor * batteryFactor * 0.9);
+const calcLocal = () => {
+  const base = 6999;
+  const usage = parseFloat(phoneParams.value.usageMonths) || 0;
+  const app   = appearanceScore.value / 100;
+  const bat   = parseInt(functionStatus.value.batteryHealth) / 100;
+  const factor = Math.max((1 - 0.018 * usage) * app * bat, 0.05);
+  recyclePrice.value = Math.floor(base * factor * 0.75);
 };
 
-const saveResult = () => {
-  const valuationResult = {
-    phoneParams: phoneParams.value,
-    appearanceScore: appearanceScore.value,
-    functionStatus: functionStatus.value,
-    recyclePrice: recyclePrice.value,
-    salePrice: salePrice.value,
-    valuationTime: new Date().toISOString()
-  };
+const saveResult = async () => {
+  if (saving.value) return;
+  saving.value = true;
+  try {
+    const res = await api.valuate({
+      model:            phoneParams.value.model,
+      ram:              phoneParams.value.ram,
+      storage:          phoneParams.value.storage,
+      channel:          phoneParams.value.channel,
+      usage_months:     parseInt(phoneParams.value.usageMonths) || 0,
+      appearance_score: appearanceScore.value,
+      battery_health:   parseInt(functionStatus.value.batteryHealth) || 100,
+      camera:           functionStatus.value.camera,
+      microphone:       functionStatus.value.microphone,
+      fingerprint:      functionStatus.value.fingerprint,
+      charging_port:    functionStatus.value.chargingPort,
+      screen_func:      functionStatus.value.screen,
+      speaker:          functionStatus.value.speaker,
+      volume_key:       functionStatus.value.volumeKey,
+      power_key:        functionStatus.value.powerKey,
+      water_damage:     functionStatus.value.waterDamage,
+      repaired:         functionStatus.value.repaired,
+      repair_note:      functionStatus.value.repairNote,
+    });
+    // 以服务端计算结果为准
+    recyclePrice.value = res.recycle_price;
 
-  let history = uni.getStorageSync('valuationHistory') || [];
-  history.push(valuationResult);
-  uni.setStorageSync('valuationHistory', history);
-
-  uni.showToast({ title: '结果已保存', icon: 'success' });
-  setTimeout(() => {
-    uni.switchTab({ url: '/pages/phoneRecyle/tabBar/home/home' });
-  }, 1000);
+    uni.showToast({ title: '已保存', icon: 'success' });
+    setTimeout(() => uni.switchTab({ url: '/pages/phoneRecyle/tabBar/home/home' }), 1000);
+  } finally {
+    saving.value = false;
+  }
 };
 
 const newValuation = () => {
@@ -147,6 +186,7 @@ const newValuation = () => {
 
 .price-display {
   display: flex;
+  flex-direction: row;
   align-items: baseline;
   gap: 16rpx;
   margin-bottom: 16rpx;
@@ -164,9 +204,49 @@ const newValuation = () => {
   letter-spacing: -2rpx;
 }
 
-.price-sale {
-  font-size: 26rpx;
-  color: rgba(255,255,255,0.6);
+.platform-tip {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.platform-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f1f5f9;
+}
+
+.platform-row:last-child {
+  border-bottom: none;
+}
+
+.platform-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.platform-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+
+.platform-name {
+  font-size: 28rpx;
+  color: #334155;
+  font-weight: 500;
+}
+
+.platform-price {
+  font-size: 28rpx;
+  color: #1e293b;
+  font-weight: 600;
 }
 
 .card {

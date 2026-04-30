@@ -6,16 +6,33 @@
         <text class="logo-text">华为智能估值系统</text>
         <text class="logo-subtitle">二手机智能回收评估平台</text>
       </view>
+
       <form class="login-form">
         <view class="form-item">
           <text class="label">用户名</text>
-          <input type="text" v-model="username" placeholder="请输入用户名" class="input" />
+          <view class="input-box">
+            <input type="text" v-model="username" placeholder="请输入用户名" placeholder-style="color:#94a3b8;" class="input" />
+          </view>
         </view>
         <view class="form-item">
           <text class="label">密码</text>
-          <input type="password" v-model="password" placeholder="请输入密码" class="input" />
+          <view class="input-box">
+            <input type="password" v-model="password" placeholder="请输入密码（至少6位）" placeholder-style="color:#94a3b8;" class="input" />
+          </view>
         </view>
-        <button type="primary" class="login-btn" @click="login">登 录</button>
+        <view class="form-item" v-if="mode === 'register'">
+          <text class="label">确认密码</text>
+          <view class="input-box">
+            <input type="password" v-model="confirmPassword" placeholder="再次输入密码" placeholder-style="color:#94a3b8;" class="input" />
+          </view>
+        </view>
+
+        <button type="primary" class="primary-btn" :disabled="loading" @click="submit">
+          {{ loading ? '请稍候...' : (mode === 'login' ? '登 录' : '注 册') }}
+        </button>
+        <button class="switch-btn" @click="switchMode">
+          {{ mode === 'login' ? '没有账号？去注册' : '已有账号？去登录' }}
+        </button>
       </form>
     </view>
   </view>
@@ -23,32 +40,77 @@
 
 <script setup>
 import { ref } from 'vue';
+import { api, setToken } from '@/common/api.uts';
 
+const mode = ref('login');
 const username = ref('');
 const password = ref('');
+const confirmPassword = ref('');
+const loading = ref(false);
 
-const login = () => {
-  if (username.value && password.value) {
-    uni.setStorageSync('userInfo', { username: username.value });
-    uni.navigateTo({ url: '/pages/phoneRecyle/home/home' });
-  } else {
-    uni.showToast({ title: '请输入用户名和密码', icon: 'none' });
+const switchMode = () => {
+  mode.value = mode.value === 'login' ? 'register' : 'login';
+  password.value = '';
+  confirmPassword.value = '';
+};
+
+const submit = async () => {
+  if (!username.value.trim() || !password.value) {
+    uni.showToast({ title: '请填写用户名和密码', icon: 'none' });
+    return;
+  }
+  if (mode.value === 'register') {
+    if (password.value.length < 6) {
+      uni.showToast({ title: '密码不能少于6位', icon: 'none' });
+      return;
+    }
+    if (password.value !== confirmPassword.value) {
+      uni.showToast({ title: '两次密码不一致', icon: 'none' });
+      return;
+    }
+  }
+  loading.value = true;
+  try {
+    if (mode.value === 'login') {
+      const res = await api.login(username.value.trim(), password.value);
+      setToken(res.token);
+      uni.setStorageSync('userInfo', { username: res.username });
+      uni.reLaunch({ url: '/pages/phoneRecyle/tabBar/home/home' });
+    } else {
+      await api.register(username.value.trim(), password.value);
+      uni.showToast({ title: '注册成功，请登录', icon: 'success' });
+      mode.value = 'login';
+      password.value = '';
+      confirmPassword.value = '';
+    }
+  } finally {
+    loading.value = false;
   }
 };
 </script>
 
+<!-- 非 scoped：设置小程序 page 根节点高度，使 100vh 居中生效 -->
+<style>
+page {
+  height: 100%;
+  background-color: #1a56db;
+}
+</style>
+
 <style scoped>
 .container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   background-color: #1a56db;
+  padding: 40rpx 0;
+  box-sizing: border-box;
 }
 
 .login-box {
   width: 86%;
-  max-width: 400px;
   background-color: #fff;
   padding: 60rpx 50rpx;
   border-radius: 32rpx;
@@ -56,13 +118,14 @@ const login = () => {
 }
 
 .logo {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 16rpx;
 }
 
 .logo-icon {
   font-size: 80rpx;
-  display: block;
   margin-bottom: 16rpx;
 }
 
@@ -76,10 +139,8 @@ const login = () => {
 .logo-subtitle {
   font-size: 24rpx;
   color: #94a3b8;
-  display: block;
   margin-top: 10rpx;
   margin-bottom: 50rpx;
-  text-align: center;
 }
 
 .form-item {
@@ -94,18 +155,24 @@ const login = () => {
   color: #475569;
 }
 
-.input {
-  width: 100%;
+.input-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   padding: 24rpx 28rpx;
   border: 2rpx solid #e2e8f0;
   border-radius: 16rpx;
-  font-size: 28rpx;
-  color: #1e293b;
   background-color: #f8fafc;
-  box-sizing: border-box;
 }
 
-.login-btn {
+.input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #1e293b;
+  background-color: transparent;
+}
+
+.primary-btn {
   width: 100%;
   margin-top: 40rpx;
   padding: 28rpx;
@@ -113,7 +180,20 @@ const login = () => {
   font-weight: bold;
   border-radius: 16rpx;
   background-color: #1a56db;
+  color: #fff;
   border: none;
   letter-spacing: 4rpx;
 }
+
+.switch-btn {
+  width: 100%;
+  margin-top: 20rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+  border-radius: 16rpx;
+  background-color: transparent;
+  color: #1a56db;
+  border: 2rpx solid #1a56db;
+}
+
 </style>

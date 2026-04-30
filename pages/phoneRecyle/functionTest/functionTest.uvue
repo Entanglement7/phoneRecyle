@@ -1,118 +1,130 @@
 <template>
-  <view class="container">
+  <scroll-view scroll-y class="container">
     <view class="page-header">
-      <text class="page-title">功能状态检测</text>
+      <text class="page-title">硬件功能检测</text>
       <text class="page-desc">请如实填写手机各项功能的状态</text>
     </view>
-    <view class="card form">
-      <view class="form-item">
-        <text class="label">电池健康度</text>
-        <view class="input-wrap">
-          <input type="number" v-model="batteryHealth" placeholder="请输入百分比，如 95" class="input" />
-          <text class="input-suffix">%</text>
+
+    <!-- 电池健康度 -->
+    <view class="card">
+      <text class="section-title">电池健康度</text>
+      <view class="input-wrap">
+        <view class="input-inner">
+          <input
+            type="number"
+            v-model="batteryHealth"
+            placeholder="请输入百分比，如 95"
+            placeholder-style="color:#94a3b8;font-size:28rpx;"
+            class="input"
+          />
         </view>
+        <text class="input-suffix">%</text>
       </view>
-      <view class="divider" />
-      <view class="form-item">
-        <text class="label">摄像头</text>
-        <view class="radio-group">
-          <view class="radio-item" :class="{ active: camera === '正常' }" @click="camera = '正常'">
-            <text class="radio-text">正常</text>
-          </view>
-          <view class="radio-item radio-item-bad" :class="{ 'active-bad': camera === '异常' }" @click="camera = '异常'">
-            <text class="radio-text">异常</text>
-          </view>
-        </view>
-      </view>
-      <view class="divider" />
-      <view class="form-item">
-        <text class="label">指纹识别</text>
-        <view class="radio-group">
-          <view class="radio-item" :class="{ active: fingerprint === '正常' }" @click="fingerprint = '正常'">
-            <text class="radio-text">正常</text>
-          </view>
-          <view class="radio-item radio-item-bad" :class="{ 'active-bad': fingerprint === '异常' }" @click="fingerprint = '异常'">
-            <text class="radio-text">异常</text>
-          </view>
-        </view>
-      </view>
-      <view class="divider" />
-      <view class="form-item">
-        <text class="label">充电口</text>
-        <view class="radio-group">
-          <view class="radio-item" :class="{ active: chargingPort === '正常' }" @click="chargingPort = '正常'">
-            <text class="radio-text">正常</text>
-          </view>
-          <view class="radio-item radio-item-bad" :class="{ 'active-bad': chargingPort === '异常' }" @click="chargingPort = '异常'">
-            <text class="radio-text">异常</text>
-          </view>
-        </view>
-      </view>
-      <view class="divider" />
-      <view class="form-item">
-        <text class="label">屏幕</text>
-        <view class="radio-group">
-          <view class="radio-item" :class="{ active: screen === '正常' }" @click="screen = '正常'">
-            <text class="radio-text">正常</text>
-          </view>
-          <view class="radio-item radio-item-bad" :class="{ 'active-bad': screen === '异常' }" @click="screen = '异常'">
-            <text class="radio-text">异常</text>
-          </view>
-        </view>
-      </view>
-      <view class="divider" />
-      <view class="form-item">
-        <text class="label">扬声器</text>
-        <view class="radio-group">
-          <view class="radio-item" :class="{ active: speaker === '正常' }" @click="speaker = '正常'">
-            <text class="radio-text">正常</text>
-          </view>
-          <view class="radio-item radio-item-bad" :class="{ 'active-bad': speaker === '异常' }" @click="speaker = '异常'">
-            <text class="radio-text">异常</text>
-          </view>
-        </view>
-      </view>
-      <button type="primary" class="submit-btn" @click="submitFunctionTest">提交并查看估值结果</button>
     </view>
-  </view>
+
+    <!-- 硬件功能 -->
+    <view class="card">
+      <text class="section-title">硬件功能检测</text>
+
+      <view v-for="item in funcItems" :key="item.key" class="func-row">
+        <text class="func-label">{{ item.label }}</text>
+        <view class="radio-group">
+          <view class="radio-item" :class="{ active: funcForm[item.key] === '正常' }" @click="funcForm[item.key] = '正常'">
+            <text class="radio-text">正常</text>
+          </view>
+          <view class="radio-item radio-bad" :class="{ 'active-bad': funcForm[item.key] === '异常' }" @click="funcForm[item.key] = '异常'">
+            <text class="radio-text">异常</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 维修进水查验 -->
+    <view class="card">
+      <text class="section-title">维修进水查验</text>
+
+      <view class="func-row">
+        <text class="func-label">进水痕迹</text>
+        <view class="radio-group">
+          <view class="radio-item" :class="{ active: waterDamage === '无' }" @click="waterDamage = '无'">
+            <text class="radio-text">无</text>
+          </view>
+          <view class="radio-item radio-bad" :class="{ 'active-bad': waterDamage === '有' }" @click="waterDamage = '有'">
+            <text class="radio-text">有</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="divider" />
+
+      <view class="func-row">
+        <text class="func-label">曾经维修</text>
+        <view class="radio-group">
+          <view class="radio-item" :class="{ active: repaired === '未维修' }" @click="repaired = '未维修'">
+            <text class="radio-text">未维修</text>
+          </view>
+          <view class="radio-item radio-bad" :class="{ 'active-bad': repaired === '已维修' }" @click="repaired = '已维修'">
+            <text class="radio-text">已维修</text>
+          </view>
+        </view>
+      </view>
+
+      <view v-if="repaired === '已维修'" class="repair-detail">
+        <text class="func-label">维修说明</text>
+        <view class="input-box">
+          <input v-model="repairNote" placeholder="请简述维修内容，如：换屏、换电池" class="input" />
+        </view>
+      </view>
+    </view>
+
+    <button type="primary" class="submit-btn" @click="submitFunctionTest">提交并查看估值结果</button>
+  </scroll-view>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 
 const batteryHealth = ref('');
-const camera = ref('正常');
-const fingerprint = ref('正常');
-const chargingPort = ref('正常');
-const screen = ref('正常');
-const speaker = ref('正常');
+
+const funcItems = [
+  { key: 'camera',       label: '摄像头' },
+  { key: 'microphone',   label: '麦克风' },
+  { key: 'fingerprint',  label: '指纹识别' },
+  { key: 'chargingPort', label: '充电口' },
+  { key: 'screen',       label: '屏幕触控' },
+  { key: 'speaker',      label: '扬声器' },
+  { key: 'volumeKey',    label: '音量键' },
+  { key: 'powerKey',     label: '电源键' },
+];
+
+const funcForm = reactive({
+  camera: '正常', microphone: '正常', fingerprint: '正常',
+  chargingPort: '正常', screen: '正常', speaker: '正常',
+  volumeKey: '正常', powerKey: '正常',
+});
+
+const waterDamage = ref('无');
+const repaired    = ref('未维修');
+const repairNote  = ref('');
 
 const submitFunctionTest = () => {
   if (!batteryHealth.value) {
     uni.showToast({ title: '请输入电池健康度', icon: 'none' });
     return;
   }
-
-  const functionStatus = {
+  uni.setStorageSync('functionStatus', {
     batteryHealth: batteryHealth.value,
-    camera: camera.value,
-    fingerprint: fingerprint.value,
-    chargingPort: chargingPort.value,
-    screen: screen.value,
-    speaker: speaker.value
-  };
-
-  uni.setStorageSync('functionStatus', functionStatus);
-  uni.showToast({ title: '检测结果提交成功', icon: 'success' });
-  setTimeout(() => {
-    uni.navigateTo({ url: '/pages/phoneRecyle/valuationResult/valuationResult' });
-  }, 1000);
+    ...funcForm,
+    waterDamage: waterDamage.value,
+    repaired: repaired.value,
+    repairNote: repairNote.value,
+  });
+  uni.navigateTo({ url: '/pages/phoneRecyle/valuationResult/valuationResult' });
 };
 </script>
 
 <style scoped>
 .container {
-  padding: 0;
   background-color: #f0f4f8;
   min-height: 100vh;
 }
@@ -138,43 +150,46 @@ const submitFunctionTest = () => {
 
 .card {
   background-color: #fff;
-  margin: 24rpx;
-  padding: 0 28rpx;
+  margin: 24rpx 24rpx 0;
+  padding: 28rpx;
   border-radius: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.07);
 }
 
-.form-item {
-  padding: 28rpx 0 20rpx;
-}
-
-.divider {
-  height: 1rpx;
-  background-color: #f1f5f9;
-}
-
-.label {
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 24rpx;
   display: block;
-  margin-bottom: 16rpx;
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #334155;
 }
 
 .input-wrap {
   display: flex;
+  flex-direction: row;
   align-items: center;
   background-color: #f8fafc;
   border: 1rpx solid #e2e8f0;
   border-radius: 14rpx;
   padding: 0 24rpx;
+  height: 88rpx;
+}
+
+.input-inner {
+  flex: 1;
+  min-width: 0;
+  height: 88rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .input {
   flex: 1;
-  padding: 22rpx 0;
+  height: 88rpx;
   font-size: 28rpx;
   color: #1e293b;
+  background-color: transparent;
 }
 
 .input-suffix {
@@ -183,20 +198,40 @@ const submitFunctionTest = () => {
   margin-left: 8rpx;
 }
 
+.func-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f1f5f9;
+}
+
+.func-row:last-child {
+  border-bottom: none;
+}
+
+.func-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #334155;
+}
+
 .radio-group {
   display: flex;
-  gap: 20rpx;
+  flex-direction: row;
+  gap: 16rpx;
 }
 
 .radio-item {
-  flex: 1;
-  padding: 18rpx;
+  padding: 12rpx 32rpx;
   border: 2rpx solid #e2e8f0;
-  border-radius: 14rpx;
+  border-radius: 12rpx;
+  background-color: #f8fafc;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: #f8fafc;
 }
 
 .radio-item.active {
@@ -204,15 +239,14 @@ const submitFunctionTest = () => {
   background-color: #ecfdf5;
 }
 
-.radio-item.radio-item-bad.active-bad {
+.radio-item.radio-bad.active-bad {
   border-color: #f43f5e;
   background-color: #fff1f2;
 }
 
 .radio-text {
-  font-size: 28rpx;
+  font-size: 26rpx;
   color: #64748b;
-  font-weight: 500;
 }
 
 .radio-item.active .radio-text {
@@ -220,14 +254,33 @@ const submitFunctionTest = () => {
   font-weight: 600;
 }
 
-.radio-item.radio-item-bad.active-bad .radio-text {
+.radio-item.radio-bad.active-bad .radio-text {
   color: #f43f5e;
   font-weight: 600;
 }
 
+.divider {
+  height: 1rpx;
+  background-color: #f1f5f9;
+}
+
+.repair-detail {
+  padding-top: 20rpx;
+}
+
+.input-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #f8fafc;
+  border: 1rpx solid #e2e8f0;
+  border-radius: 14rpx;
+  padding: 0 24rpx;
+  margin-top: 12rpx;
+}
+
 .submit-btn {
-  width: 100%;
-  margin: 30rpx 0 36rpx;
+  margin: 32rpx 24rpx 48rpx;
   padding: 28rpx;
   font-size: 30rpx;
   font-weight: bold;
