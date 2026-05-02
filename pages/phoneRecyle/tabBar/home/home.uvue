@@ -73,6 +73,17 @@
 </template>
 
 <script setup>
+import { onLoad } from '@dcloudio/uni-app';
+import { getToken } from '@/common/api.uts';
+
+// 页面加载时检查登录状态
+onLoad(() => {
+  const token = getToken();
+  if (!token) {
+    uni.reLaunch({ url: '/pages/phoneRecyle/login/login' });
+  }
+});
+
 const startValuation = () => {
   uni.navigateTo({ url: '/pages/phoneRecyle/inputParams/inputParams' });
 };

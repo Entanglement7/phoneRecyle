@@ -1,5 +1,14 @@
 {
 	"pages": [
+		// 登录页面（首页）
+		{
+			"path": "pages/phoneRecyle/login/login",
+			"style": {
+				"navigationBarTitleText": "登录",
+				"navigationStyle": "custom"
+			}
+		},
+
 		// 底部导航栏页面
 		{
 			"path": "pages/phoneRecyle/tabBar/home/home",
@@ -25,14 +34,8 @@
 				"navigationBarTitleText": "个人中心"
 			}
 		},
-		
+
 		// 功能页面
-		{
-			"path": "pages/phoneRecyle/login/login",
-			"style": {
-				"navigationBarTitleText": "登录"
-			}
-		},
 		{
 			"path": "pages/phoneRecyle/inputParams/inputParams",
 			"style": {

@@ -134,7 +134,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { api, clearToken } from '@/common/api.uts';
+import { api, clearToken, getToken } from '@/common/api.uts';
 
 const userInfo = ref({ username: '', nickname: '', avatar: '', phone: '' });
 
@@ -144,6 +144,12 @@ const displayInitial = computed(() => {
 });
 
 onMounted(async () => {
+  const token = getToken();
+  if (!token) {
+    uni.reLaunch({ url: '/pages/phoneRecyle/login/login' });
+    return;
+  }
+
   const stored = uni.getStorageSync('userInfo');
   if (stored) userInfo.value = { ...userInfo.value, ...stored };
   try {

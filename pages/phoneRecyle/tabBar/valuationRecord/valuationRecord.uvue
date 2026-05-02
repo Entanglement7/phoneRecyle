@@ -87,11 +87,21 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { api } from '@/common/api.uts';
+import { api, getToken } from '@/common/api.uts';
 
 const searchKeyword = ref('');
 const records = ref([]);
 const loading = ref(false);
+
+// 页面加载时检查登录状态
+onMounted(() => {
+  const token = getToken();
+  if (!token) {
+    uni.reLaunch({ url: '/pages/phoneRecyle/login/login' });
+    return;
+  }
+  loadRecords();
+});
 
 const loadRecords = async () => {
   loading.value = true;
@@ -101,8 +111,6 @@ const loadRecords = async () => {
     loading.value = false;
   }
 };
-
-onMounted(loadRecords);
 
 const filteredRecords = computed(() => {
   if (!searchKeyword.value) return records.value;
